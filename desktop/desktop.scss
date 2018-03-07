@@ -7239,3 +7239,45 @@ body.fixed-menu .header-bottom > .grid-container {
 @media screen and (min-width: 1170px) and (max-width: 1220px) {
   .search-area {
     width: 27% !important; } }
+.site-footer {
+  position: relative;
+  z-index: 5;
+  padding-top: 50px;
+  padding-bottom: 150px;
+  border-top: 5px solid #61666e;
+  margin-top: 5em;
+  background-color: #3d4045;
+  color: #fefefe; }
+
+.newsletter-subscription-form {
+  color: #fefefe; }
+  .newsletter-subscription-form h4 {
+    font-size: 18px;
+    font-weight: bold; }
+  .newsletter-subscription-form .input-group .button {
+    border-radius: 0 5px 5px 0;
+    margin-bottom: 0; }
+  .newsletter-subscription-form .input-group input:first-child {
+    border-radius: 5px 0 0 5px; }
+
+.footer-links strong {
+  padding-right: .625rem;
+  font-size: 18px; }
+.footer-links a {
+  color: #fefefe;
+  text-decoration: none; }
+  .footer-links a:hover, .footer-links a:active, .footer-links a:focus {
+    color: #bebebe; }
+.footer-links ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  margin-bottom: 1em; }
+  .footer-links ul li {
+    padding: 0;
+    padding-right: .625rem;
+    margin: 0; }
+@media screen and (min-width: 64em) {
+  .footer-links .product-category li {
+    float: left;
+    width: 50%; } }
