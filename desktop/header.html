@@ -1,10 +1,73 @@
-<div id="top-navbar" class="container">
-	<span id="top-navbar-links" style="height:20px;">
-		<a href="http://example.com">Home</a> | 
-		<a href="http://example.com/about/">About</a> | 
-		<a href="http://example.com/news/">News</a> | 
-		<a href="http://example.com/products/">Products</a> | 
-		<a href="http://blog.example.com/blog">Blog</a> | 
-		<a href="http://forums.example.com/">Forums</a>
-	</span>
-</div>
+<header class="site-header no-flicker">
+	<div class="header-top">
+		<div class="grid-container">
+			<div class="grid-x grid-padding-x">
+				<div class="cell">
+					<div class="header-desktop-controls">
+						<div class="logo-area">
+							<a class="brand" href="/community">
+								<img src="/community/web/build/images/common/rb1.png" class="rb1 show-for-large">
+								<img src="/community/web/build/images/common/logo.png" class="logotype">
+								<img src="/community/web/build/images/common/logotype.png" class="community show-for-medium">
+							</a>
+						</div>
+						<div class="user-area show-for-large">
+							<a href="/community/register/">Create an account</a>&nbsp;
+							<a href="/community/login">Login</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="header-middle hide-for-large">
+		<div class="header-mobile-controls">
+			<div class="grid-container">
+				<div class="grid-x">
+					<div class="cell small-6">
+						<div class="nav-primary-mobile-trigger">
+							<div class="menuicon">
+								<span></span>
+							</div>
+							<label>Menu</label>
+						</div>
+					</div>
+					<div class="cell small-6 text-right">
+						<div class="search-mobile-trigger">
+							<div class="searchicon"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="header-bottom">
+	<div class="grid-container">
+		<div class="grid-x">
+			<nav class="nav-primary cell small-12 large-10 xlarge-9 xxlarge-8">
+				<div class="user-area-mobile hide-for-large">
+					<a href="/community/register/">Create an account</a>&nbsp;
+					<a href="/community/login">Login</a>
+				</div>
+				<ul>
+					<li class="rb1-icon"><a href="/community"><img src="/community/web/build/images/common/rb1-small.png" class="rb1 show-for-large"></a></li>
+					<li><a href="/community/" class="active ">Dashboard</a></li>
+					<li><a href="/community/" class=" forum-scheme">Forums</a></li>
+					<li><a href="/community/tutorials" class=" tutorial-scheme">Tutorials</a></li>
+					<li><a href="/community/robots" class=" robots-scheme">Robots</a></li>
+					<li><a href="/community/blog" class=" blog-scheme">Blog</a></li>
+					<li><a href="#" class=" ">News</a></li>
+					<li><a href="/community/leaderboard" class=" leaderboard-scheme">Leaderboard</a></li>
+					<li><a href="#" class=" ">Shop</a></li>
+					<li><a href="#" class=" ">Support</a></li>
+				</ul>
+			</nav>
+			<div class="search-area cell small-12 large-auto">
+				<form action="/community/search">
+					<input type="text" name="q" placeholder="Search for topics, robots, tutorials and more..."><button type="submit" class="button">go
+					
+				</button></form></div>
+			</div>
+		</div>
+	</div>
+</header>
