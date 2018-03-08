@@ -1,12 +1,14 @@
 <link rel="stylesheet" type="text/css" href="http://dev.robotshop.com/community/web/build/styles/forum.css" />
 <script type="text/javascript">
-jQuery('.nav-primary-mobile-trigger').click(function() {
-	jQuery(this).toggleClass('active');
-	jQuery('.nav-primary').slideToggle();
-});
+$(document).ready(function() {
+	jQuery('.nav-primary-mobile-trigger').click(function() {
+		jQuery(this).toggleClass('active');
+		jQuery('.nav-primary').slideToggle();
+	});
 
-jQuery('.search-mobile-trigger').click(function() {
-	jQuery(this).toggleClass('active');
-	jQuery('.search-area').slideToggle();
+	jQuery('.search-mobile-trigger').click(function() {
+		jQuery(this).toggleClass('active');
+		jQuery('.search-area').slideToggle();
+	});
 });
 </script>
