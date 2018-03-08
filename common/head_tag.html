@@ -3,14 +3,16 @@
 $(document).ready(function() {
 	jQuery('.nav-primary-mobile-trigger').click(function() {
 		jQuery(this).toggleClass('active');
-		jQuery('body').toggleClass('mobile-nav-open');
-		jQuery('.nav-primary').slideToggle();
+		jQuery('.nav-primary').slideToggle(function(){
+			jQuery('body').toggleClass('mobile-nav-open');
+		});
 	});
 
 	jQuery('.search-mobile-trigger').click(function() {
 		jQuery(this).toggleClass('active');
-		jQuery('body').toggleClass('mobile-search-open');
-		jQuery('.search-area').slideToggle();
+		jQuery('.search-area').slideToggle(function(){
+			jQuery('body').toggleClass('mobile-search-open');
+		});
 	});
 });
 </script>
