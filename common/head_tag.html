@@ -3,11 +3,13 @@
 $(document).ready(function() {
 	jQuery('.nav-primary-mobile-trigger').click(function() {
 		jQuery(this).toggleClass('active');
+		jQuery(this).toggleClass('mobile-nav-open');
 		jQuery('.nav-primary').slideToggle();
 	});
 
 	jQuery('.search-mobile-trigger').click(function() {
 		jQuery(this).toggleClass('active');
+		jQuery(this).toggleClass('mobile-search-open');
 		jQuery('.search-area').slideToggle();
 	});
 });
