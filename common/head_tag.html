@@ -26,12 +26,13 @@ robotshopTheme.app = (function(window, document, $) {
 				__.$body.toggleClass('mobile-search-open');
 			});
 		});
+		$('#main').bind('DOMSubtreeModified', function(e) {
+			var template = '<div class="hero-search-section-content"> <h1>Forum</h1> <strong> Search among our 10 robotics and electronics <br> tutorials and learn something new today </strong> <div class="content-search-area"> <input type="text" name="" placeholder="How to..."><a class="button white-button hollow">go</a> </div> <div class="hero-search-section-footer"> <a class="button white-button hollow" href="/community/tutorials/new">Write a tutorial</a> <span>Share your knowledge today and get rewarded</span> </div> </div>';
 
-		var template = '<div class="hero-search-section-content"> <h1>Forum</h1> <strong> Search among our 10 robotics and electronics <br> tutorials and learn something new today </strong> <div class="content-search-area"> <input type="text" name="" placeholder="How to..."><a class="button white-button hollow">go</a> </div> <div class="hero-search-section-footer"> <a class="button white-button hollow" href="/community/tutorials/new">Write a tutorial</a> <span>Share your knowledge today and get rewarded</span> </div> </div>';
-
-		if(__.$body.hasClass('navigation-topics')) {
-			$(template).insertAfter(".site-header");
-		};
+			if(__.$body.hasClass('navigation-topics')) {
+				$(template).insertAfter(".site-header");
+			};
+		});
 
 	});
 })(robotshopTheme.window, robotshopTheme.document, robotshopTheme.jQuery);
