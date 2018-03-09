@@ -136,9 +136,8 @@ robotshopTheme.jQuery = window.jQuery;
 robotshopTheme.public = {};
 
 robotshopTheme.app = (function(window, document, $) {
-
     robotshopTheme.local = {};
-    
+
 	var __ = {};
 	__.$body = $('body');
 	__.$window = $('window');
@@ -147,7 +146,7 @@ robotshopTheme.app = (function(window, document, $) {
 	robotshopTheme.public.addBeforeBody = function() {
 		if($('body').hasClass('navigation-topics') || $('body').hasClass('navigation-categories')) {
 			if($('.hero-search-section-content').length === 0) {
-				var template = '<div class="foundation-init-wrapper"><div class="before-body hero-search-section no-flicker forum"><div class="hero-search-section-content"> <h1>Forums</h1> <strong></strong> <div class="content-search-area"> <form action="http://192.168.7.209/community/forum/search"><input type="text" name="q" placeholder="How to..."><button type="submit" class="button white-button hollow"></form> </div> <div class="hero-search-section-footer centered-buttons"> <a class="button white-button hollow" id="rb-new-topic">Ask a question</a> <a href="/community/forum/c/1" class="button white-button hollow">Consult the Knowledge Base</a> </div> </div> </div> </div>';
+				var template = '<div class="foundation-init-wrapper"><div class="before-body hero-search-section no-flicker forum"><div class="hero-search-section-content"> <h1>Forums</h1> <strong></strong> <div class="content-search-area"> <form action="http://192.168.7.209/community/forum/search"><input type="text" name="q" placeholder="Search for topics ..."><button type="submit" class="button white-button hollow"></form> </div> <div class="hero-search-section-footer centered-buttons"> <a class="button white-button hollow" id="rb-new-topic">Ask a question</a> <a href="/community/forum/c/1" class="button white-button hollow">Consult the Knowledge Base</a> </div> </div> </div> </div>';
 
 				$(template).insertBefore("#main-outlet");
 				robotshopTheme.local.setBeforeBodyText();
