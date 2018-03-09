@@ -136,32 +136,52 @@ robotshopTheme.jQuery = window.jQuery;
 robotshopTheme.public = {};
 
 robotshopTheme.app = (function(window, document, $) {
-	console.log('app');
+
+    robotshopTheme.local = {};
+    
 	var __ = {};
 	__.$body = $('body');
 	__.$window = $('window');
 	__.$document = $('document');
 
 	robotshopTheme.public.addBeforeBody = function() {
-		console.log($('.hero-search-section-content').length, $('body').hasClass('navigation-topics'));
 		if($('body').hasClass('navigation-topics') || $('body').hasClass('navigation-categories')) {
 			if($('.hero-search-section-content').length === 0) {
-				var template = '<div class="foundation-init-wrapper"><div class="before-body hero-search-section no-flicker forum"><div class="hero-search-section-content"> <h1>Forums</h1> <strong> Participate in hundreds of ongoing<br class="show-for-large"> conversations, or start a new one today </strong> <div class="content-search-area"> <input type="text" name="" placeholder="How to..."><a class="button white-button hollow">go</a> </div> <div class="hero-search-section-footer"> <a class="button white-button hollow" href="/community/tutorials/new">Write a tutorial</a> <span>Share your knowledge today and get rewarded</span> </div> </div> </div> </div>';
+				var template = '<div class="foundation-init-wrapper"><div class="before-body hero-search-section no-flicker forum"><div class="hero-search-section-content"> <h1>Forums</h1> <strong></strong> <div class="content-search-area"> <input type="text" name="" placeholder="How to..."><a class="button white-button hollow">go</a> </div> <div class="hero-search-section-footer centered-buttons"> <a class="button white-button hollow" id="rb-new-topic">Ask a question</a> <a href="/community/forum/c/1" class="button white-button hollow">Consult the Knowledge Base</a> </div> </div> </div> </div>';
 
 				$(template).insertBefore("#main-outlet");
+				robotshopTheme.local.setBeforeBodyText();
 			}
 		} else {
 			$('.hero-search-section-content').remove();
 		}
-	}
+	};
+	
+	robotshopTheme.local.setBeforeBodyText = function() {
+		var totalTopics = 0;
+		var text = 'Participate in hundreds of ongoing<br class="show-for-large"> conversations, or start a new one today';
+		$.ajax({
+			url: '/community/forum/categories.json',
+			type: 'GET',
+			dataType: 'json',
+		})
+		.done(function(data) {
+			$.each(data.category_list.categories, function(i, cat) {
+				totalTopics += cat.topic_count;
+			});
+			text = 'Participate in over '+totalTopics+' existing <br class="show-for-large"/> conversations, or start a new one today!';
+		})
+		.always(function(data) {
+			$('.hero-search-section-content strong').html(text);
+		});
+	};
 
 	__.$document.ready(function() {
     	__.$body = $('body');
     	__.$window = $('window');
     	__.$document = $('document');
-	
+
 		__.$body.addClass('forum-body-scheme');
-		
 
 		$("body").attrchange({
 			trackValues: true, // set to true so that the event object is updated with old & new values
@@ -176,18 +196,20 @@ robotshopTheme.app = (function(window, document, $) {
 				}
 			}
 		});
-		
+
 		$('.nav-primary-mobile-trigger').click(function() {
 			$(this).toggleClass('active');
+			__.$body.toggleClass('mobile-nav-open');
 			$('.nav-primary').slideToggle(function(){
-				__.$body.toggleClass('mobile-nav-open');
+			    __.$body.toggleClass('mobile-nav-open-done');
 			});
 		});
 
 		$('.search-mobile-trigger').click(function() {
 			$(this).toggleClass('active');
+			__.$body.toggleClass('mobile-search-open');
 			$('.search-area').slideToggle(function(){
-				__.$body.toggleClass('mobile-search-open');
+			    __.$body.toggleClass('mobile-search-open-done');
 			});
 		});
 
