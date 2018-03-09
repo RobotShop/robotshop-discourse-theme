@@ -1,18 +1,38 @@
 <link rel="stylesheet" type="text/css" href="http://dev.robotshop.com/community/web/build/styles/forum.css" />
 <script type="text/javascript">
-$(document).ready(function() {
-	jQuery('.nav-primary-mobile-trigger').click(function() {
-		jQuery(this).toggleClass('active');
-		jQuery('.nav-primary').slideToggle(function(){
-			jQuery('body').toggleClass('mobile-nav-open');
-		});
-	});
+var robotshopTheme = {};
 
-	jQuery('.search-mobile-trigger').click(function() {
-		jQuery(this).toggleClass('active');
-		jQuery('.search-area').slideToggle(function(){
-			jQuery('body').toggleClass('mobile-search-open');
+robotshopTheme.jQuery = window.jQuery.noConflict();
+robotshopTheme.window   = window;
+robotshopTheme.document = document;
+
+robotshopTheme.app = (function(window, document, $) {
+	var __ = {};
+	__.$body = $('body');
+	__.$window = $('window');
+	__.$document = $('document');
+
+	__.$document.ready(function() {
+		$('.nav-primary-mobile-trigger').click(function() {
+			$(this).toggleClass('active');
+			$('.nav-primary').slideToggle(function(){
+				__.$body.toggleClass('mobile-nav-open');
+			});
 		});
+
+		$('.search-mobile-trigger').click(function() {
+			$(this).toggleClass('active');
+			$('.search-area').slideToggle(function(){
+				__.$body.toggleClass('mobile-search-open');
+			});
+		});
+
+		var template = '<div class="hero-search-section-content"> <h1>Forum</h1> <strong> Search among our 10 robotics and electronics <br> tutorials and learn something new today </strong> <div class="content-search-area"> <input type="text" name="" placeholder="How to..."><a class="button white-button hollow">go</a> </div> <div class="hero-search-section-footer"> <a class="button white-button hollow" href="/community/tutorials/new">Write a tutorial</a> <span>Share your knowledge today and get rewarded</span> </div> </div>';
+
+		if(__.$body.hasClass('navigation-topics')) {
+			$(template).insertAfter(".site-header");
+		};
+
 	});
-});
+})(robotshopTheme.window, robotshopTheme.document, robotshopTheme.jQuery);
 </script>
