@@ -1,40 +1,182 @@
 <link rel="stylesheet" type="text/css" href="http://dev.robotshop.com/community/web/build/styles/forum.css" />
 <script type="text/javascript">
+	/*
+	A simple jQuery function that can add listeners on attribute change.
+	http://meetselva.github.io/attrchange/
+
+	About License:
+	Copyright (C) 2013-2014 Selvakumar Arumugam
+	You may use attrchange plugin under the terms of the MIT Licese.
+	https://github.com/meetselva/attrchange/blob/master/MIT-License.txt
+	 */
+	(function($) {
+		function isDOMAttrModifiedSupported() {
+			var p = document.createElement('p');
+			var flag = false;
+
+			if (p.addEventListener) {
+				p.addEventListener('DOMAttrModified', function() {
+					flag = true
+				}, false);
+			} else if (p.attachEvent) {
+				p.attachEvent('onDOMAttrModified', function() {
+					flag = true
+				});
+			} else { return false; }
+			p.setAttribute('id', 'target');
+			return flag;
+		}
+
+		function checkAttributes(chkAttr, e) {
+			if (chkAttr) {
+				var attributes = this.data('attr-old-value');
+
+				if (e.attributeName.indexOf('style') >= 0) {
+					if (!attributes['style'])
+						attributes['style'] = {}; //initialize
+					var keys = e.attributeName.split('.');
+					e.attributeName = keys[0];
+					e.oldValue = attributes['style'][keys[1]]; //old value
+					e.newValue = keys[1] + ':'
+							+ this.prop("style")[$.camelCase(keys[1])]; //new value
+					attributes['style'][keys[1]] = e.newValue;
+				} else {
+					e.oldValue = attributes[e.attributeName];
+					e.newValue = this.attr(e.attributeName);
+					attributes[e.attributeName] = e.newValue;
+				}
+
+				this.data('attr-old-value', attributes); //update the old value object
+			}
+		}
+
+		//initialize Mutation Observer
+		var MutationObserver = window.MutationObserver
+				|| window.WebKitMutationObserver;
+
+		$.fn.attrchange = function(a, b) {
+			if (typeof a == 'object') {//core
+				var cfg = {
+					trackValues : false,
+					callback : $.noop
+				};
+				//backward compatibility
+				if (typeof a === "function") { cfg.callback = a; } else { $.extend(cfg, a); }
+
+				if (cfg.trackValues) { //get attributes old value
+					this.each(function(i, el) {
+						var attributes = {};
+						for ( var attr, i = 0, attrs = el.attributes, l = attrs.length; i < l; i++) {
+							attr = attrs.item(i);
+							attributes[attr.nodeName] = attr.value;
+						}
+						$(this).data('attr-old-value', attributes);
+					});
+				}
+
+				if (MutationObserver) { //Modern Browsers supporting MutationObserver
+					var mOptions = {
+						subtree : false,
+						attributes : true,
+						attributeOldValue : cfg.trackValues
+					};
+					var observer = new MutationObserver(function(mutations) {
+						mutations.forEach(function(e) {
+							var _this = e.target;
+							//get new value if trackValues is true
+							if (cfg.trackValues) {							
+								e.newValue = $(_this).attr(e.attributeName);
+							}						
+							if ($(_this).data('attrchange-status') === 'connected') { //execute if connected
+								cfg.callback.call(_this, e);
+							}
+						});
+					});
+
+					return this.data('attrchange-method', 'Mutation Observer').data('attrchange-status', 'connected')
+							.data('attrchange-obs', observer).each(function() {
+								observer.observe(this, mOptions);
+							});
+				} else if (isDOMAttrModifiedSupported()) { //Opera
+					//Good old Mutation Events
+					return this.data('attrchange-method', 'DOMAttrModified').data('attrchange-status', 'connected').on('DOMAttrModified', function(event) {
+						if (event.originalEvent) { event = event.originalEvent; }//jQuery normalization is not required 
+						event.attributeName = event.attrName; //property names to be consistent with MutationObserver
+						event.oldValue = event.prevValue; //property names to be consistent with MutationObserver
+						if ($(this).data('attrchange-status') === 'connected') { //disconnected logically
+							cfg.callback.call(this, event);
+						}
+					});
+				} else if ('onpropertychange' in document.body) { //works only in IE		
+					return this.data('attrchange-method', 'propertychange').data('attrchange-status', 'connected').on('propertychange', function(e) {
+						e.attributeName = window.event.propertyName;
+						//to set the attr old value
+						checkAttributes.call($(this), cfg.trackValues, e);
+						if ($(this).data('attrchange-status') === 'connected') { //disconnected logically
+							cfg.callback.call(this, e);
+						}
+					});
+				}
+				return this;
+			} else if (typeof a == 'string' && $.fn.attrchange.hasOwnProperty('extensions') &&
+					$.fn.attrchange['extensions'].hasOwnProperty(a)) { //extensions/options
+				return $.fn.attrchange['extensions'][a].call(this, b);
+			}
+		}
+	})(jQuery);
+</script>
+
+<script type="text/javascript">
 var robotshopTheme = {};
 
 robotshopTheme.window   = window;
 robotshopTheme.document = document;
 robotshopTheme.jQuery = window.jQuery;
 
+robotshopTheme.public = {};
+
 robotshopTheme.app = (function(window, document, $) {
+	console.log('app');
 	var __ = {};
 	__.$body = $('body');
 	__.$window = $('window');
 	__.$document = $('document');
 
-	var timeout_check_change_class;
-	function check_change_class( selector ) {
-	    $(selector).each(function(index, el) {
-	        var data_old_class = $(el).attr('data-old-class');
-	        if (typeof data_old_class !== typeof undefined && data_old_class !== false) 
-	        {
+	robotshopTheme.public.addBeforeBody = function() {
+		console.log($('.hero-search-section-content').length, $('body').hasClass('navigation-topics'));
+		if($('body').hasClass('navigation-topics') || $('body').hasClass('navigation-categories')) {
+			if($('.hero-search-section-content').length === 0) {
+				var template = '<div class="foundation-init-wrapper"><div class="before-body hero-search-section no-flicker forum"><div class="hero-search-section-content"> <h1>ForumS</h1> <strong> Participate in hundreds of ongoing conversations, <br />or start a new one today </strong> <div class="content-search-area"> <input type="text" name="" placeholder="How to..."><a class="button white-button hollow">go</a> </div> <div class="hero-search-section-footer"> <a class="button white-button hollow" href="/community/tutorials/new">Write a tutorial</a> <span>Share your knowledge today and get rewarded</span> </div> </div> </div> </div>';
 
-	            if( data_old_class != $(el).attr('class') )
-	            {
-	                $(el).trigger('change_class');
-	            }
-	        }
-
-	        $(el).attr('data-old-class', $(el).attr('class') );
-
-	    });
-
-	    clearTimeout( timeout_check_change_class );
-	    timeout_check_change_class = setTimeout(check_change_class, 10, selector);
-	};
-
+				$(template).insertBefore("#main-outlet");
+			}
+		} else {
+			$('.hero-search-section-content').remove();
+		}
+	}
 
 	__.$document.ready(function() {
+    	__.$body = $('body');
+    	__.$window = $('window');
+    	__.$document = $('document');
+	
+		__.$body.addClass('forum-body-scheme');
+		
+
+		$("body").attrchange({
+			trackValues: true, // set to true so that the event object is updated with old & new values
+			callback: function(evnt) {
+
+		        $('body').addClass('forum-body-scheme');
+
+				if(evnt.attributeName == "class") { // which attribute you want to watch for changes
+					// if(evnt.newValue.search(/navigation-topics/i) == -1) { // "open" is the class name you search for inside "class" attribute
+						robotshopTheme.public.addBeforeBody();
+					// }
+				}
+			}
+		});
+		
 		$('.nav-primary-mobile-trigger').click(function() {
 			$(this).toggleClass('active');
 			$('.nav-primary').slideToggle(function(){
@@ -49,14 +191,7 @@ robotshopTheme.app = (function(window, document, $) {
 			});
 		});
 
-		check_change_class('#main');
-
-		$('#main').on('change_class', function(event) {
-			console.log('change', event);
-			var template = '<div class="hero-search-section-content"> <h1>Forum</h1> <strong> Search among our 10 robotics and electronics <br> tutorials and learn something new today </strong> <div class="content-search-area"> <input type="text" name="" placeholder="How to..."><a class="button white-button hollow">go</a> </div> <div class="hero-search-section-footer"> <a class="button white-button hollow" href="/community/tutorials/new">Write a tutorial</a> <span>Share your knowledge today and get rewarded</span> </div> </div>';
-
-			$(template).insertAfter(".site-header");
-		});
+		robotshopTheme.public.addBeforeBody();
 	});
 })(robotshopTheme.window, robotshopTheme.document, robotshopTheme.jQuery);
 </script>
