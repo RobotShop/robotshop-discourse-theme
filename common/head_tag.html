@@ -52,6 +52,7 @@ robotshopTheme.app = (function(window, document, $) {
 		check_change_class('#main');
 
 		$('#main').on('change_class', function(event) {
+			console.log('change', event);
 			var template = '<div class="hero-search-section-content"> <h1>Forum</h1> <strong> Search among our 10 robotics and electronics <br> tutorials and learn something new today </strong> <div class="content-search-area"> <input type="text" name="" placeholder="How to..."><a class="button white-button hollow">go</a> </div> <div class="hero-search-section-footer"> <a class="button white-button hollow" href="/community/tutorials/new">Write a tutorial</a> <span>Share your knowledge today and get rewarded</span> </div> </div>';
 
 			$(template).insertAfter(".site-header");
