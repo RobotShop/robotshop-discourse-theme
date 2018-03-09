@@ -146,7 +146,7 @@ robotshopTheme.app = (function(window, document, $) {
 		console.log($('.hero-search-section-content').length, $('body').hasClass('navigation-topics'));
 		if($('body').hasClass('navigation-topics') || $('body').hasClass('navigation-categories')) {
 			if($('.hero-search-section-content').length === 0) {
-				var template = '<div class="foundation-init-wrapper"><div class="before-body hero-search-section no-flicker forum"><div class="hero-search-section-content"> <h1>ForumS</h1> <strong> Participate in hundreds of ongoing conversations, <br />or start a new one today </strong> <div class="content-search-area"> <input type="text" name="" placeholder="How to..."><a class="button white-button hollow">go</a> </div> <div class="hero-search-section-footer"> <a class="button white-button hollow" href="/community/tutorials/new">Write a tutorial</a> <span>Share your knowledge today and get rewarded</span> </div> </div> </div> </div>';
+				var template = '<div class="foundation-init-wrapper"><div class="before-body hero-search-section no-flicker forum"><div class="hero-search-section-content"> <h1>Forums</h1> <strong> Participate in hundreds of ongoing<br class="show-for-large"> conversations, or start a new one today </strong> <div class="content-search-area"> <input type="text" name="" placeholder="How to..."><a class="button white-button hollow">go</a> </div> <div class="hero-search-section-footer"> <a class="button white-button hollow" href="/community/tutorials/new">Write a tutorial</a> <span>Share your knowledge today and get rewarded</span> </div> </div> </div> </div>';
 
 				$(template).insertBefore("#main-outlet");
 			}
