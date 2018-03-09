@@ -12,6 +12,28 @@ robotshopTheme.app = (function(window, document, $) {
 	__.$window = $('window');
 	__.$document = $('document');
 
+	var timeout_check_change_class;
+	function check_change_class( selector ) {
+	    $(selector).each(function(index, el) {
+	        var data_old_class = $(el).attr('data-old-class');
+	        if (typeof data_old_class !== typeof undefined && data_old_class !== false) 
+	        {
+
+	            if( data_old_class != $(el).attr('class') )
+	            {
+	                $(el).trigger('change_class');
+	            }
+	        }
+
+	        $(el).attr('data-old-class', $(el).attr('class') );
+
+	    });
+
+	    clearTimeout( timeout_check_change_class );
+	    timeout_check_change_class = setTimeout(check_change_class, 10, selector);
+	};
+
+
 	__.$document.ready(function() {
 		$('.nav-primary-mobile-trigger').click(function() {
 			$(this).toggleClass('active');
@@ -26,14 +48,14 @@ robotshopTheme.app = (function(window, document, $) {
 				__.$body.toggleClass('mobile-search-open');
 			});
 		});
-		$('#main').bind('DOMSubtreeModified', function(e) {
+
+		check_change_class('#main');
+
+		$('#main').on('change_class', function(event) {
 			var template = '<div class="hero-search-section-content"> <h1>Forum</h1> <strong> Search among our 10 robotics and electronics <br> tutorials and learn something new today </strong> <div class="content-search-area"> <input type="text" name="" placeholder="How to..."><a class="button white-button hollow">go</a> </div> <div class="hero-search-section-footer"> <a class="button white-button hollow" href="/community/tutorials/new">Write a tutorial</a> <span>Share your knowledge today and get rewarded</span> </div> </div>';
 
-			if(__.$body.hasClass('navigation-topics')) {
-				$(template).insertAfter(".site-header");
-			};
+			$(template).insertAfter(".site-header");
 		});
-
 	});
 })(robotshopTheme.window, robotshopTheme.document, robotshopTheme.jQuery);
 </script>
