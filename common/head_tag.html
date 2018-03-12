@@ -230,7 +230,11 @@
 
 	        __.$body.on('click', '#rb-new-topic', function(event) {
 	        	event.preventDefault();
-	        	$('#create-topic').trigger('click');
+	        	if($('body').hasClass('logged-off')) {
+	        		$('.header-buttons .login-button').trigger('click');
+	        	} else {
+	        		$('#create-topic').trigger('click');
+	        	}
 	        });
 
 
