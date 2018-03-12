@@ -125,100 +125,132 @@
 		}
 	})(jQuery);
 </script>
-
 <script type="text/javascript">
-var robotshopTheme = {};
+	var robotshopTheme = {};
 
-robotshopTheme.window   = window;
-robotshopTheme.document = document;
-robotshopTheme.jQuery = window.jQuery;
+	robotshopTheme.window   = window;
+	robotshopTheme.document = document;
+	robotshopTheme.jQuery = window.jQuery;
 
-robotshopTheme.public = {};
+	robotshopTheme.public = {};
 
-robotshopTheme.app = (function(window, document, $) {
-    robotshopTheme.local = {};
+	robotshopTheme.app = (function(window, document, $) {
+	    robotshopTheme.local = {};
 
-	var __ = {};
-	__.$body = $('body');
-	__.$window = $('window');
-	__.$document = $('document');
+		var __ = {};
+		__.$body = $('body');
+		__.$window = $('window');
+		__.$document = $('document');
 
-	robotshopTheme.public.addBeforeBody = function() {
-		if($('body').hasClass('navigation-topics') || $('body').hasClass('navigation-categories')) {
-			if($('.hero-search-section-content').length === 0) {
-				var template = '<div class="foundation-init-wrapper"><div class="before-body hero-search-section no-flicker forum"><div class="hero-search-section-content"> <h1>Forums</h1> <strong></strong> <div class="content-search-area"> <form action="http://192.168.7.209/community/forum/search"><input type="text" name="q" placeholder="Search for topics ..."><button type="submit" class="button white-button hollow"></form> </div> <div class="hero-search-section-footer centered-buttons"> <a class="button white-button hollow" id="rb-new-topic">Ask a question</a> <a href="/community/forum/c/1" class="button white-button hollow">Consult the Knowledge Base</a> </div> </div> </div> </div>';
+		robotshopTheme.public.addBeforeBody = function() {
+			if($('body').hasClass('navigation-topics') || $('body').hasClass('navigation-categories')) {
+				if($('.hero-search-section-content').length === 0) {
+					var template = '<div class="foundation-init-wrapper"><div class="before-body hero-search-section no-flicker forum"><div class="hero-search-section-content"> <h1>Forums</h1> <strong></strong> <div class="content-search-area"> <form action="http://192.168.7.209/community/forum/search"><input type="text" name="q" placeholder="Search for topics ..."><button type="submit" class="button white-button hollow"></form> </div> <div class="hero-search-section-footer centered-buttons"> <a class="button white-button hollow" id="rb-new-topic">Ask a question</a> <a href="/community/forum/c/1" class="button white-button hollow">Consult the Knowledge Base</a> </div> </div> </div> </div>';
 
-				$(template).insertBefore("#main-outlet");
-				robotshopTheme.local.setBeforeBodyText();
-			}
-		} else {
-			$('.hero-search-section-content').remove();
-		}
-	};
-	
-	robotshopTheme.local.setBeforeBodyText = function() {
-		var totalTopics = 0;
-		var text = 'Participate in hundreds of ongoing<br class="show-for-large"> conversations, or start a new one today';
-		$.ajax({
-			url: '/community/forum/categories.json',
-			type: 'GET',
-			dataType: 'json',
-		})
-		.done(function(data) {
-			$.each(data.category_list.categories, function(i, cat) {
-				totalTopics += cat.topic_count;
-			});
-			text = 'Participate in over '+totalTopics+' existing <br class="show-for-large"/> conversations, or start a new one today!';
-		})
-		.always(function(data) {
-			$('.hero-search-section-content strong').html(text);
-		});
-	};
-
-	__.$document.ready(function() {
-    	__.$body = $('body');
-    	__.$window = $('window');
-    	__.$document = $('document');
-
-		__.$body.addClass('forum-body-scheme');
-
-		$("body").attrchange({
-			trackValues: true, // set to true so that the event object is updated with old & new values
-			callback: function(evnt) {
-
-		        $('body').addClass('forum-body-scheme');
-
-				if(evnt.attributeName == "class") { // which attribute you want to watch for changes
-					// if(evnt.newValue.search(/navigation-topics/i) == -1) { // "open" is the class name you search for inside "class" attribute
-						robotshopTheme.public.addBeforeBody();
-					// }
+					$(template).insertBefore("#main-outlet");
+					robotshopTheme.local.setBeforeBodyText();
 				}
+			} else {
+				$('.hero-search-section-content').remove();
 			}
-		});
-
-        __.$body.on('click', '#rb-new-topic', function(event) {
-        	event.preventDefault();
-        	$('#create-topic').trigger('click');
-        });
-
-
-		$('.nav-primary-mobile-trigger').click(function() {
-			$(this).toggleClass('active');
-			__.$body.toggleClass('mobile-nav-open');
-			$('.nav-primary').slideToggle(function(){
-			    __.$body.toggleClass('mobile-nav-open-done');
+		};
+		
+		robotshopTheme.local.setBeforeBodyText = function() {
+			var totalTopics = 0;
+			var text = 'Participate in hundreds of ongoing<br class="show-for-large"> conversations, or start a new one today';
+			$.ajax({
+				url: '/community/forum/categories.json',
+				type: 'GET',
+				dataType: 'json',
+			})
+			.done(function(data) {
+				$.each(data.category_list.categories, function(i, cat) {
+					totalTopics += cat.topic_count;
+				});
+				text = 'Participate in over '+totalTopics+' existing <br class="show-for-large"/> conversations, or start a new one today!';
+			})
+			.always(function(data) {
+				$('.hero-search-section-content strong').html(text);
 			});
-		});
+		};
 
-		$('.search-mobile-trigger').click(function() {
-			$(this).toggleClass('active');
-			__.$body.toggleClass('mobile-search-open');
-			$('.search-area').slideToggle(function(){
-			    __.$body.toggleClass('mobile-search-open-done');
+		__.$document.ready(function() {
+	    	__.$body = $('body');
+	    	__.$window = $('window');
+	    	__.$document = $('document');
+
+			__.$body.addClass('forum-body-scheme');
+			if($('#current-user').length === 0) {
+				$('body').addClass('logged-off');
+			} else {
+				$('body').removeClass('logged-off');
+			}
+
+			$("body").attrchange({
+				trackValues: true, // set to true so that the event object is updated with old & new values
+				callback: function(evnt) {
+			        $('body').addClass('forum-body-scheme');
+
+					if(evnt.attributeName == "class") { // which attribute you want to watch for changes
+						// if(evnt.newValue.search(/navigation-topics/i) == -1) { // "open" is the class name you search for inside "class" attribute
+							robotshopTheme.public.addBeforeBody();
+							if($('#current-user').length === 0) {
+								$('body').addClass('logged-off');
+							} else {
+								$('body').removeClass('logged-off');
+							}
+						// }
+					}
+				}
 			});
-		});
 
-		robotshopTheme.public.addBeforeBody();
-	});
-})(robotshopTheme.window, robotshopTheme.document, robotshopTheme.jQuery);
+			$('<li class="header-dropdown-toggle"><a data-auto-route="true" title="go to another topic list or category" aria-label="go to another topic list or category" id="rb-logout" class="icon btn-flat"><i class="fa fa-bars d-icon d-icon-bars" aria-hidden="true"></i></a></li>').insertBefore('#current-user')
+
+			$('<span class="header-buttons"><button id="rb-create-account" class="widget-button btn btn-primary btn-small login-button btn-icon-text" aria-label="Create an account" title="Create an account"><i class="fa fa-user d-icon d-icon-user" aria-hidden="true"></i><span class="d-button-label">Create an account</span></button></span>').insertBefore($('.d-header .login-button').closest('.header-buttons'));
+
+
+	        __.$body.on('click', '#rb-logout', function(event) {
+	        	event.preventDefault();
+	        	if($('.user-menu').length == 0) {
+		        	$('#current-user a').trigger('click');
+		        	setTimeout(function(){
+		        		$('.user-menu .logout').trigger('click');
+		        	}, 150)
+		        }else {
+		        	$('.user-menu .logout').trigger('click');
+			    }
+	        });
+
+
+	        __.$body.on('click', '#rb-create-account', function(event) {
+	        	event.preventDefault();
+	        	window.location.href = "http://dev.robotshop.com/community/register/";
+	        });
+
+
+	        __.$body.on('click', '#rb-new-topic', function(event) {
+	        	event.preventDefault();
+	        	$('#create-topic').trigger('click');
+	        });
+
+
+			$('.nav-primary-mobile-trigger').click(function() {
+				$(this).toggleClass('active');
+				__.$body.toggleClass('mobile-nav-open');
+				$('.nav-primary').slideToggle(function(){
+				    __.$body.toggleClass('mobile-nav-open-done');
+				});
+			});
+
+			$('.search-mobile-trigger').click(function() {
+				$(this).toggleClass('active');
+				__.$body.toggleClass('mobile-search-open');
+				$('.search-area').slideToggle(function(){
+				    __.$body.toggleClass('mobile-search-open-done');
+				});
+			});
+
+			robotshopTheme.public.addBeforeBody();
+		});
+	})(robotshopTheme.window, robotshopTheme.document, robotshopTheme.jQuery);
 </script>
