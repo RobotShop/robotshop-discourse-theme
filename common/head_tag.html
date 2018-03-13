@@ -154,7 +154,7 @@
 				$('.hero-search-section-content').remove();
 			}
 		};
-		
+
 		robotshopTheme.local.setBeforeBodyText = function() {
 			var totalTopics = 0;
 			var text = 'Participate in hundreds of ongoing<br class="show-for-large"> conversations, or start a new one today';
@@ -212,7 +212,7 @@
 	        __.$body.on('click', '#rb-logout', function(event) {
 	        	event.preventDefault();
 	        	if($('.user-menu').length == 0) {
-		        	$('#current-user a').trigger('click');
+		        	$('#current-user > a').trigger('click');
 		        	setTimeout(function(){
 		        		$('.user-menu .logout').trigger('click');
 		        	}, 150)
