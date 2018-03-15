@@ -95,6 +95,10 @@
 				$('#rb-user-nav li.active').removeClass('active');
 				$('#rb-user-nav a[href^="'+window.location.href+'"]').closest('li').addClass('active');
 			}, 150)
+			setTimeout(function(){
+				$('#rb-user-nav li.active').removeClass('active');
+				$('#rb-user-nav a[href^="'+window.location.href+'"]').closest('li').addClass('active');
+			}, 250)
 		};
 		robotshopTheme.public.manageUserLoginStatusBodyClass = function() {
 			if($('#current-user').length === 0) {
