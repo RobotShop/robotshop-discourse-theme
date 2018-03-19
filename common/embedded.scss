@@ -1,3 +1,31 @@
 * {
-	background: transparent !important;
+     // background: transparent !important;
+}
+ article.post {
+     border-bottom: 1px solid #ddd;
+}
+ article.post.deleted {
+     background-color: #ffe5e5;
+}
+ article.post .post-date {
+     color: #aaa;
+}
+ .username a {
+     color: #5c5c5c;
+}
+ .username a.new-user {
+     color: #5c5c5c;
+}
+ .username span.title {
+     color: #999;
+}
+ .in-reply-to {
+     color: #0088cc;
+}
+ .replies {
+     color: #999;
+}
+footer.button {
+     color: white;
+     background-color: #0088cc;
 }
