@@ -1,31 +1,73 @@
-* {
-     // background: transparent !important;
+a {
+	color: #545454;
 }
- article.post {
-     border-bottom: 1px solid #ddd;
+// .tutorials {
+// 	a {
+// 		color: #009638;
+// 	}
+// }
+
+// .robots {
+// 	a {
+// 		color: #0b889e;
+// 	}
+// }
+html {
+	background-color: transparent;
 }
- article.post.deleted {
-     background-color: #ffe5e5;
+.cooked a, .d-editor-preview a {
+	color: #b82101;
 }
- article.post .post-date {
-     color: #aaa;
+
+a.post-replies {
+	color: #545454;
 }
- .username a {
-     color: #5c5c5c;
+article.post {
+	border-bottom: 1px solid #ddd;
+	font-size: 16px;
 }
- .username a.new-user {
-     color: #5c5c5c;
+
+article.post.deleted {
+	background-color: #ffe5e5;
 }
- .username span.title {
-     color: #999;
+
+article.post .post-date {
+	color: #aaa;
 }
- .in-reply-to {
-     color: #0088cc;
+
+.username {
+	margin-bottom: .25em;
 }
- .replies {
-     color: #999;
+
+.username a {
+	color: #0a0a0a !important;
+	background-color: transparent !important;
 }
-footer.button {
-     color: white;
-     background-color: #0088cc;
+
+.username a.new-user {
+	color: #0a0a0a;
+}
+
+.username span.title {
+	color: #0a0a0a;
+}
+
+.in-reply-to {
+	color: #0a0a0a;
+}
+
+.replies {
+	color: #0a0a0a;
+}
+
+header .button, footer .button {
+	color: white !important;
+	background-color: #0a0a0a !important;
+	padding: 8px 28px;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+footer img {
+	display: none;
 }
