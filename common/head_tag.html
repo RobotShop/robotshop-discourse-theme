@@ -174,7 +174,8 @@
 			});
 
 			// Disable onboarding
-			__.$body.on('click', '.ring-backdrop-spotlight, .ring-backdrop', function(){
+			__.$body.on('click', '.ring-backdrop-spotlight, .ring-backdrop', function(e){
+				e.preventDefault();
 				$('.ring-backdrop').remove();
 				$('.ring-backdrop-spotlight').remove();
 			});
