@@ -172,6 +172,12 @@
 				    __.$body.toggleClass('mobile-search-open-done');
 				});
 			});
+
+			// Disable onboarding
+			__.$body.on('click', '.ring-backdrop-spotlight, .ring-backdrop', function(){
+				$('.ring-backdrop').remove();
+				$('.ring-backdrop-spotlight').remove();
+			});
 		};
 		robotshopTheme.local.initTemplates = function() {
 			robotshopTheme.public.currentUser = $('#current-user').length > 0 ? $('#current-user img').attr('title') : '';
