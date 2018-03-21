@@ -26,7 +26,7 @@
 			$( "#rb-forum-grid" ).wrap(robotshopTheme.templatesHTML.sectionGridContainer);
 		};
 		robotshopTheme.public.setUserNavigation = function() {
-			robotshopTheme.public.currentUser = $('#current-user').length > 0 ? $('#current-user img').attr('title') : '';
+			robotshopTheme.public.currentUser = $('#current-user > a').length > 0 ? $('#current-user > a').attr('href').match(/\/([^/]*)$/)[1] : '';
 			if($('#rb-user-nav').length === 0) {
 				$(robotshopTheme.templatesHTML.sectionUserNavigation).insertBefore("#main-outlet");
 			} else {
@@ -182,7 +182,7 @@
 			});
 		};
 		robotshopTheme.local.initTemplates = function() {
-			robotshopTheme.public.currentUser = $('#current-user').length > 0 ? $('#current-user img').attr('title') : '';
+			robotshopTheme.public.currentUser = $('#current-user > a').length > 0 ? $('#current-user > a').attr('href').match(/\/([^/]*)$/)[1] : '';
 
 			robotshopTheme.templatesHTML = {};
 			robotshopTheme.templatesHTML.buttonLogOut = '<li class="header-dropdown-toggle"><a data-auto-route="true" title="go to another topic list or category" aria-label="go to another topic list or category" id="rb-logout" class="icon btn-flat"><i class="fa fa-bars d-icon d-icon-bars" aria-hidden="true"></i></a></li>';
