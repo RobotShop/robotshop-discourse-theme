@@ -91,6 +91,9 @@
 		};
 		robotshopTheme.local.manageUserNavActive = function() {
 			var setUserNavActive = function() {
+			    if(!$('html').hasClass('rb-user-pages')){
+			    	return false;
+			    }
 				$('#rb-user-nav li.active').removeClass('active');
 				$('#rb-user-nav a[href="'+window.location.href+'"]').closest('li').addClass('active');
 				if($('#rb-user-nav li.active').length == 0) {
@@ -99,8 +102,8 @@
 			};
 
 			setUserNavActive();
-			setTimeout(setUserNavActive(), 150);
-			setTimeout(setUserNavActive(), 250);
+			setTimeout(function(){setUserNavActive();}, 150);
+			setTimeout(function(){setUserNavActive();}, 250);
 		};
 		robotshopTheme.local.manageUserLoginStatusBodyClass = function() {
 			if($('#current-user').length === 0) {
