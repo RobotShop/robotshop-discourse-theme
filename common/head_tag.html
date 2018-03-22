@@ -83,8 +83,10 @@
 				window.location.href.indexOf($('#current-user > a').attr('href')) > -1
 			){
 				$('html').addClass('rb-user-pages');
+				$('.nav-primary .forum-scheme').removeClass('active');
 			} else {
 				$('html').removeClass('rb-user-pages');
+				$('.nav-primary .forum-scheme').addClass('active');
 			}
 		};
 		robotshopTheme.local.manageUserNavActive = function() {
