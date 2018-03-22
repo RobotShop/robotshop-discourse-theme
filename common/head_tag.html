@@ -89,12 +89,10 @@
 		};
 		robotshopTheme.local.manageUserNavActive = function() {
 			var setUserNavActive = function() {
-				if($('html').hasClass('rb-user-pages')) {
-					$('#rb-user-nav li.active').removeClass('active');
-					$('#rb-user-nav a[href="'+window.location.href+'"]').closest('li').addClass('active');
-					if($('#rb-user-nav li.active').length == 0) {
-						$('.default-active').addClass('active');
-					}
+				$('#rb-user-nav li.active').removeClass('active');
+				$('#rb-user-nav a[href="'+window.location.href+'"]').closest('li').addClass('active');
+				if($('#rb-user-nav li.active').length == 0) {
+					$('.default-active').addClass('active');
 				}
 			};
 
