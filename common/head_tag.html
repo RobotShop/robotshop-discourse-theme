@@ -95,9 +95,11 @@
 					$('.default-active').addClass('active');
 				}
 			};
-			setUserNavActive();
-			setTimeout(setUserNavActive(), 150);
-			setTimeout(setUserNavActive(), 250);
+			if($('html').hasClass('rb-user-pages')) {
+				setUserNavActive();
+				setTimeout(setUserNavActive(), 150);
+				setTimeout(setUserNavActive(), 250);
+			}
 		};
 		robotshopTheme.local.manageUserLoginStatusBodyClass = function() {
 			if($('#current-user').length === 0) {
