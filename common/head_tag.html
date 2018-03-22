@@ -89,17 +89,18 @@
 		};
 		robotshopTheme.local.manageUserNavActive = function() {
 			var setUserNavActive = function() {
-				$('#rb-user-nav li.active').removeClass('active');
-				$('#rb-user-nav a[href="'+window.location.href+'"]').closest('li').addClass('active');
-				if($('#rb-user-nav li.active').length == 0) {
-					$('.default-active').addClass('active');
+				if($('html').hasClass('rb-user-pages')) {
+					$('#rb-user-nav li.active').removeClass('active');
+					$('#rb-user-nav a[href="'+window.location.href+'"]').closest('li').addClass('active');
+					if($('#rb-user-nav li.active').length == 0) {
+						$('.default-active').addClass('active');
+					}
 				}
 			};
-			if($('html').hasClass('rb-user-pages')) {
-				setUserNavActive();
-				setTimeout(setUserNavActive(), 150);
-				setTimeout(setUserNavActive(), 250);
-			}
+
+			setUserNavActive();
+			setTimeout(setUserNavActive(), 150);
+			setTimeout(setUserNavActive(), 250);
 		};
 		robotshopTheme.local.manageUserLoginStatusBodyClass = function() {
 			if($('#current-user').length === 0) {
