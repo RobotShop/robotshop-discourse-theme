@@ -44,7 +44,7 @@
 				)
 			) {
 				if($('.hero-search-section-content').length === 0) {
-					
+
 					var template = robotshopTheme.templatesHTML.sectionSearch;
 
 					if($('#rb-forum-container').length > 0) {
@@ -52,10 +52,14 @@
 					} else {
 						$(template).insertBefore("#main-outlet");
 					}
+					if(!$('body').hasClass('rb-has-hero-section')){
+						$('body').addClass('rb-has-hero-section');
+					}
 					robotshopTheme.local.setBeforeBodyText();
 				}
 			} else {
 				$('.hero-search-section-content').closest('.foundation-init-wrapper').remove();
+				$('body').removeClass('rb-has-hero-section');
 			}
 		};
 		robotshopTheme.local.addCustomHeaderLinks = function() {
