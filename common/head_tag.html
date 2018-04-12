@@ -70,12 +70,12 @@
 			var totalTopics = 0;
 			var text = 'Participate in hundreds of ongoing<br class="show-for-large"> conversations, or start a new one today';
 			$.ajax({
-				url: '/community/forum/categories.json',
+				url: '/community/forum/site.json',
 				type: 'GET',
 				dataType: 'json',
 			})
 			.done(function(data) {
-				$.each(data.category_list.categories, function(i, cat) {
+				$.each(data.categories, function(i, cat) {
 					totalTopics += cat.topic_count;
 				});
 				text = 'Participate in over '+totalTopics+' existing <br class="show-for-large"/> conversations, or start a new one today!';
