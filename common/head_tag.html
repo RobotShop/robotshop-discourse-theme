@@ -159,7 +159,7 @@
 			    }*/
 	        });
 
-	        __.$body.on('click', '[rb-go-to-home]', function(event) {
+	        __.$body.on('click', '[data-rb-go-to-home]', function(event) {
 	        	event.preventDefault();
 	        	Discourse.__container__.lookup('router:main').router.transitionTo("discovery.categories")
 	        });
