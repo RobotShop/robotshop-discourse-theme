@@ -63,7 +63,7 @@
 			}
 		};
 		robotshopTheme.local.addCustomHeaderLinks = function() {
-			$(robotshopTheme.templatesHTML.buttonLogOut).insertBefore('#current-user')
+			$(robotshopTheme.templatesHTML.buttonLogOut).insertBefore('#current-user');
 			$('#search-button').closest('li').remove();
 			$(robotshopTheme.templatesHTML.buttonCreateAccount).insertBefore($('.d-header .login-button').closest('.header-buttons'));
 		};
@@ -209,7 +209,7 @@
 			robotshopTheme.public.currentUser = $('#current-user > a').length > 0 ? $('#current-user > a').attr('href').match(/\/([^/]*)$/)[1] : '';
 
 			robotshopTheme.templatesHTML = {};
-			robotshopTheme.templatesHTML.buttonLogOut = '<li><a id="rb-logout"><i></i></a></li>';
+			robotshopTheme.templatesHTML.buttonLogOut = '<li><a id="rb-logout"><i class="fa fa-bars d-icon d-icon-bars" aria-hidden="true"></i></a></li>';
 			robotshopTheme.templatesHTML.buttonCreateAccount = '<span class="header-buttons"><button id="rb-create-account" class="widget-button btn btn-primary btn-small login-button btn-icon-text" aria-label="Create an account" title="Create an account"><i class="fa fa-user d-icon d-icon-user" aria-hidden="true"></i><span class="d-button-label">Create an account</span></button></span>';
 			robotshopTheme.templatesHTML.sectionSearch = '<div class="foundation-init-wrapper"><div class="before-body hero-search-section no-flicker forum"><div class="hero-search-section-content"> <h1>Forums</h1> <strong></strong> <div class="content-search-area"> <form action="'+FORUM_URL+'/search"><input type="text" name="q" placeholder="Search for topics ..."><button type="submit" class="button white-button hollow"></form> </div> <div class="hero-search-section-footer centered-buttons"> <a class="button white-button hollow" id="rb-new-topic">Ask a question</a> <a href="'+FORUM_URL+'/c/15" class="button white-button hollow">Consult the Knowledge Base</a> </div> </div> </div> </div>';
 			robotshopTheme.templatesHTML.sectionUserNavigation = '<div id="rb-user-nav"><ul class="cms-menu"> <li><a href="'+COMMUNITY_URL+'/profile/">Overview</a></li> <li><a href="'+FORUM_URL+'/u/'+robotshopTheme.public.currentUser+'/notifications">Notifications</a></li> <li><a href="'+FORUM_URL+'/u/'+robotshopTheme.public.currentUser+'/messages">Messages</a></li> <li><a href="'+FORUM_URL+'/u/'+robotshopTheme.public.currentUser+'/badges">My Badges</a></li><li class="default-active"><a href="'+FORUM_URL+'/u/'+robotshopTheme.public.currentUser+'/preferences/profile">Forum Profile</a></li> <li><a href="'+COMMUNITY_URL+'/logout">Log Out</a></li> </ul> </div>';
