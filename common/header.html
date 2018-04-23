@@ -12,7 +12,7 @@
 								<img src="http://devcommunity.robotshop.com/community/web/build/images/common/logotype.png" class="community show-for-medium">
 							</a>
 						</div>
-						<div class="show-for-large"><a data-rb-logout class="hide-discourse-logged-off" id="rb-logout" href="/community/logout">Log out</a></div>
+						<div class="show-for-large"><a data-rb-logout class="show-loggedin-only-ib" id="rb-logout" href="/community/logout">Log out</a></div>
 					</div>
 				</div>
 			</div>
@@ -44,9 +44,9 @@
 		<div class="grid-x">
 			<nav class="nav-primary cell small-12 large-10 xlarge-9 xxlarge-8">
 				<div class="user-area-mobile hide-for-large">
-					<a class="hide-discourse-logged-off" data-rb-logout href="/community/logout">Log out</a>
-					<a class="hide-discourse-logged-in" href="/community/register/">Create an account</a>&nbsp;
-					<a class="hide-discourse-logged-in" href="/community/login">Login</a>
+					<a class="show-loggedin-only" data-rb-logout href="/community/logout">Log out</a>
+					<a class="show-loggedoff-only" href="/community/register/">Create an account</a>&nbsp;
+					<a class="show-loggedoff-only" href="/community/login">Login</a>
 				</div>
 				<ul>
 					<li class="rb1-icon"><a href="/community"><img src="http://devcommunity.robotshop.com/community/web/build/images/common/rb1-small.png" class="rb1 show-for-large"></a></li>
