@@ -63,7 +63,8 @@
 			}
 		};
 		robotshopTheme.local.addCustomHeaderLinks = function() {
-			$(robotshopTheme.templatesHTML.buttonLogOut).insertBefore('#current-user');
+			$(robotshopTheme.templatesHTML.buttonLogOut).insertBefore($('#current-user').closest('ul').find('li:first-child'));
+			// $(robotshopTheme.templatesHTML.buttonLogOut).insertBefore('#current-user');
 			// $('#search-button').closest('li').remove();
 			// $('.search-menu').remove();
 			$(robotshopTheme.templatesHTML.buttonCreateAccount).insertBefore($('.d-header .login-button').closest('.header-buttons'));
