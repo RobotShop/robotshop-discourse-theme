@@ -123,8 +123,10 @@
 		robotshopTheme.local.manageUserLoginStatusBodyClass = function() {
 			if($('#current-user').length === 0) {
 				$('body').addClass('logged-off');
+				$('body').removeClass('logged-in');
 			} else {
 				$('body').removeClass('logged-off');
+				$('body').addClass('logged-in');
 			}
 		};
 		robotshopTheme.local.onPageChange = function() {
