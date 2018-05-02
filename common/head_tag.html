@@ -139,6 +139,43 @@
 			// Manage user settings pages navigation active class
 			robotshopTheme.local.setUserNavigation();
 		};
+
+		robotshopTheme.local.openModal = function(title, content){
+    		var $modal = $('#discourse-modal');
+        	$('body').addClass('modal-open').addClass('robotshop-modal-open').append('<div class="modal-backdrop in"></div>');
+        	$modal.show();
+        	$modal.addClass('full');
+        	$modal.addClass('in');
+        	$modal.removeClass('hidden');
+        	$modal.find('.modal-header h3').html(title);
+        	$modal.find('.modal-inner-container').append(content);
+        	$('.robotshop-modal-open').on('click','.modal-middle-container',function(e){
+        		if($('body').hasClass('robotshop-modal-open')){
+	        		if(e.target != this) return;
+	        		robotshopTheme.local.closeModal();
+        		}
+        		return;
+        	});
+        	$('.robotshop-modal-open').on('click','.modal-close',function(){
+        		if($('body').hasClass('robotshop-modal-open')){
+	        		robotshopTheme.local.closeModal();
+        		}
+        		return;
+        	});
+    	};
+
+		robotshopTheme.local.closeModal = function() {
+    		var $modal = $('#discourse-modal');
+        	$('body').removeClass('modal-open').removeClass('robotshop-modal-open');
+        	$('.modal-backdrop').remove();
+        	$modal.hide();
+        	$modal.removeClass('full');
+        	$modal.removeClass('in');
+        	$modal.addClass('hidden');
+        	$modal.find('.modal-header h3').html('');
+        	$modal.find('.modal-body').remove();
+    	};
+
 		robotshopTheme.local.bindEvents = function() {
 			__.$body.attrchange({
 				trackValues: true, // set to true so that the event object is updated with old & new values
@@ -176,13 +213,76 @@
 	        });
 
 
+	        __.$body.on('click', '#new-topic-choice', function(event) {
+	        	if($('body').hasClass('logged-off')) {
+	        		$('.header-buttons .login-button').trigger('click');
+	        	} else {
+		        	event.preventDefault();
+		        	robotshopTheme.local.openModal('Ask a question', '<div class="modal-body"><p>Choose the visibility of your question.</p><button class="btn-primary btn btn-text ember-view" id="rb-new-private-topic">Private</button> <button class="btn-primary btn btn-text ember-view" id="rb-new-topic">Public</button></div>');
+		        }
+		    });
+
+
 	        __.$body.on('click', '#rb-new-topic', function(event) {
 	        	event.preventDefault();
 	        	if($('body').hasClass('logged-off')) {
 	        		$('.header-buttons .login-button').trigger('click');
 	        	} else {
-	        		$('#create-topic').trigger('click');
+	        		robotshopTheme.local.closeModal();
+	        		Discourse.__container__.lookup('router:main').router.transitionTo("discovery.parentCategory","help-support");
+	        		var waitForCreateButton = function(selector, time) {
+					    if(document.querySelector(selector)!=null) {
+					        $('#create-topic').trigger('click');
+					        return;
+					    }
+					    else {
+					        setTimeout(function() {
+					            waitForCreateButton(selector, time);
+					        }, time);
+					    }
+					}
+					waitForCreateButton('#create-topic', 50);
 	        	}
+	        });
+
+
+	        __.$body.on('click', '#rb-new-private-topic', function(event) {
+	        	event.preventDefault();
+	        	if($('body').hasClass('logged-off')) {
+	        		$('.header-buttons .login-button').trigger('click');
+	        	} else {
+	        		robotshopTheme.local.closeModal();
+		        	Discourse.__container__.lookup('router:main').router.transitionTo("topic","about-the-private-support-category",109);
+	        		var waitForGroupButton = function(selector, time) {
+					    if(document.querySelector(selector)!=null) {
+					        $('[href="/community/forum/groups/private-support"]').get(0).click();
+					        waitForDmButton('#user-card .group-message-button', 50);
+					        return;
+					    }
+					    else {
+					        setTimeout(function() {
+					            waitForGroupButton(selector, time);
+					        }, time);
+					    }
+					}
+					var waitForDmButton = function(selector, time) {
+					    if(document.querySelector(selector)!=null) {
+					        $('#user-card .group-message-button').get(0).click();
+					        setTimeout(function() {
+					        	$('#reply-control textarea').val("Hi!\n \n I require your help regarding a problem I'm encountering.\n \n **Description**: \n \n **Hardware concerned**:\n \n **Software concerned**:\n \n **Troubleshooting steps already taken**:\n \n **Additional information**:\n \n Thank you so much in advance for your help!\n");
+					        }, 50);
+					        return;
+					    }
+					    else {
+					        setTimeout(function() {
+					            waitForDmButton(selector, time);
+					        }, time);
+					    }
+					}
+		        	setTimeout(function(){
+						waitForGroupButton('[href="/community/forum/groups/private-support"]', 50);
+	        		}, 250);
+        		}
 	        });
 
 
@@ -203,11 +303,11 @@
 			});
 
 			// Disable onboarding
-			__.$body.on('click', '.ring-backdrop-spotlight, .ring-backdrop', function(e){
-				e.preventDefault();
-				$('.ring-backdrop').remove();
-				$('.ring-backdrop-spotlight').remove();
-			});
+			// __.$body.on('click', '.ring-backdrop-spotlight, .ring-backdrop', function(e){
+			// 	e.preventDefault();
+			// 	$('.ring-backdrop').remove();
+			// 	$('.ring-backdrop-spotlight').remove();
+			// });
 		};
 		robotshopTheme.local.initTemplates = function() {
 			robotshopTheme.public.currentUser = $('#current-user > a').length > 0 ? $('#current-user > a').attr('href').match(/\/([^/]*)$/)[1] : '';
@@ -215,7 +315,7 @@
 			robotshopTheme.templatesHTML = {};
 			// robotshopTheme.templatesHTML.buttonLogOut = '<li><a id="rb-logout" class="icon btn-flat"><i class="fa fa-bars d-icon d-icon-bars" aria-hidden="true"></i></a></li>';
 			robotshopTheme.templatesHTML.buttonCreateAccount = '<span class="header-buttons"><button id="rb-create-account" class="widget-button btn btn-primary btn-small login-button btn-icon-text" aria-label="Create an account" title="Create an account"><i class="fa fa-user d-icon d-icon-user" aria-hidden="true"></i><span class="d-button-label">Create an account</span></button></span>';
-			robotshopTheme.templatesHTML.sectionSearch = '<div class="foundation-init-wrapper"><div class="before-body hero-search-section no-flicker forum"><div class="hero-search-section-content"> <h1>Forums</h1> <strong></strong> <div class="content-search-area"> <form action="'+FORUM_URL+'/search"><input type="text" name="q" placeholder="Search for topics ..."><button type="submit" class="button white-button hollow"></form> </div> <div class="hero-search-section-footer centered-buttons"> <a class="button white-button hollow" id="rb-new-topic">Ask a question</a> <a href="'+FORUM_URL+'/c/15" class="button white-button hollow">Consult the Knowledge Base</a> </div> </div> </div> </div>';
+			robotshopTheme.templatesHTML.sectionSearch = '<div class="foundation-init-wrapper"><div class="before-body hero-search-section no-flicker forum"><div class="hero-search-section-content"> <h1>Forums</h1> <strong></strong> <div class="content-search-area"> <form action="'+FORUM_URL+'/search"><input type="text" name="q" placeholder="Search for topics ..."><button type="submit" class="button white-button hollow"></form> </div> <div class="hero-search-section-footer centered-buttons"> <a class="button white-button hollow" id="new-topic-choice">Ask a question</a> <a href="'+FORUM_URL+'/c/15" class="button white-button hollow">Consult the Knowledge Base</a> </div> </div> </div> </div>';
 			robotshopTheme.templatesHTML.sectionUserNavigation = '<div id="rb-user-nav"><ul class="cms-menu"> <li><a href="'+COMMUNITY_URL+'/profile/">Overview</a></li> <li><a href="'+FORUM_URL+'/u/'+robotshopTheme.public.currentUser+'/notifications">Notifications</a></li> <li><a href="'+FORUM_URL+'/u/'+robotshopTheme.public.currentUser+'/messages">Messages</a></li> <li><a href="'+FORUM_URL+'/u/'+robotshopTheme.public.currentUser+'/badges">My Badges</a></li><li class="default-active"><a href="'+FORUM_URL+'/u/'+robotshopTheme.public.currentUser+'/preferences/profile">Forum Profile</a></li> <li><a href="'+COMMUNITY_URL+'/logout">Log Out</a></li> </ul> </div>';
 			robotshopTheme.templatesHTML.sectionGrid = '<div id="rb-forum-grid"></div>';
 			robotshopTheme.templatesHTML.sectionGridContainer = '<div id="rb-forum-container"></div>';
