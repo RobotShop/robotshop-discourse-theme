@@ -228,8 +228,6 @@
 	        	if($('body').hasClass('logged-off')) {
 	        		$('.header-buttons .login-button').trigger('click');
 	        	} else {
-	        		robotshopTheme.local.closeModal();
-	        		Discourse.__container__.lookup('router:main').router.transitionTo("discovery.parentCategory","help-support");
 	        		var waitForCreateButton = function(selector, time) {
 					    if(document.querySelector(selector)!=null) {
 					        $('#create-topic').trigger('click');
@@ -241,7 +239,12 @@
 					        }, time);
 					    }
 					}
-					waitForCreateButton('#create-topic', 50);
+
+	        		robotshopTheme.local.closeModal();
+	        		Discourse.__container__.lookup('router:main').router.transitionTo("discovery.parentCategory","help-support");
+					setTimeout(function() {
+						waitForCreateButton('#create-topic', 50);
+					}, 150);
 	        	}
 	        });
 
