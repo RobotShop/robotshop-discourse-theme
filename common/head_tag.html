@@ -39,7 +39,7 @@
 				$('body').hasClass('navigation-topics') ||
 				$('body').hasClass('navigation-categories') ||
 				(
-					$('body').hasClass('category-mmunity-forum/c/help-support/knowledge-base-useful-topics') &&
+					/*$("body[class*='c/help-support']").length &&*/
 					!$('body').hasClass('archetype-regular')
 				)
 			) {
@@ -213,15 +213,20 @@
 	        });
 
 
-	        __.$body.on('click', '#new-topic-choice', function(event) {
+	        __.$body.on('click', '#rb-go-to-wiki', function(event) {
+	        	event.preventDefault();
+	        	Discourse.__container__.lookup('router:main').router.transitionTo("discovery.topCategory",'help-support','knowledge-base-useful-topics');
+	        });
+
+
+	        __.$body.on('click', '#rb-ask-private-disclaimer', function(event) {
 	        	if($('body').hasClass('logged-off')) {
 	        		$('.header-buttons .login-button').trigger('click');
 	        	} else {
 		        	event.preventDefault();
-		        	robotshopTheme.local.openModal('Ask a question', '<div class="modal-body"><p>Choose the visibility of your question.</p><button class="btn-primary btn btn-text ember-view" id="rb-new-private-topic">Private</button> <button class="btn-primary btn btn-text ember-view" id="rb-new-topic">Public</button></div>');
+		        	robotshopTheme.local.openModal('Are you looking for help?', '<div class="modal-body"><p style="margin-top:0;">Our community-sourced team of experts can handle your sensitive and confidential issues in our private support</p><button class="btn-primary btn btn-text ember-view" id="rb-new-private-topic">Continue</button>&nbsp;&nbsp;<button class="btn-secondary btn btn-text ember-view" id="rb-new-topic">Ask a public question instead</button></div>');
 		        }
 		    });
-
 
 	        __.$body.on('click', '#rb-new-topic', function(event) {
 	        	event.preventDefault();
@@ -318,7 +323,7 @@
 			robotshopTheme.templatesHTML = {};
 			// robotshopTheme.templatesHTML.buttonLogOut = '<li><a id="rb-logout" class="icon btn-flat"><i class="fa fa-bars d-icon d-icon-bars" aria-hidden="true"></i></a></li>';
 			robotshopTheme.templatesHTML.buttonCreateAccount = '<span class="header-buttons"><button id="rb-create-account" class="widget-button btn btn-primary btn-small login-button btn-icon-text" aria-label="Create an account" title="Create an account"><i class="fa fa-user d-icon d-icon-user" aria-hidden="true"></i><span class="d-button-label">Create an account</span></button></span>';
-			robotshopTheme.templatesHTML.sectionSearch = '<div class="foundation-init-wrapper"><div class="before-body hero-search-section no-flicker forum"><div class="hero-search-section-content"> <h1>Forums</h1> <strong></strong> <div class="content-search-area"> <form action="'+FORUM_URL+'/search"><input type="text" name="q" placeholder="Search for topics ..."><button type="submit" class="button white-button hollow"></form> </div> <div class="hero-search-section-footer centered-buttons"> <a class="button white-button hollow" id="new-topic-choice">Ask a question</a> <a href="'+FORUM_URL+'/c/15" class="button white-button hollow">Consult the Knowledge Base</a> </div> </div> </div> </div>';
+			robotshopTheme.templatesHTML.sectionSearch = '<div class="foundation-init-wrapper"><div class="before-body hero-search-section no-flicker forum"><div class="hero-search-section-content"> <h1>Forums</h1> <strong></strong> <div class="content-search-area"> <form action="'+FORUM_URL+'/search"><input type="text" name="q" placeholder="Search for topics ..."><button type="submit" class="button white-button hollow"></form> </div> <div class="hero-search-section-footer centered-buttons"> <a class="button white-button hollow" id="rb-new-topic">Ask a question</a> <a id="rb-go-to-wiki" class="button white-button hollow">Consult the Knowledge Base</a> </div> <div><a style="display:inline-block;color:#fff;opacity:.8;font-size:12px;" href="#" id="rb-ask-private-disclaimer">Ask a private question</a></div> </div> </div> </div>';
 			robotshopTheme.templatesHTML.sectionUserNavigation = '<div id="rb-user-nav"><ul class="cms-menu"> <li><a href="'+COMMUNITY_URL+'/profile/">Overview</a></li> <li><a href="'+FORUM_URL+'/u/'+robotshopTheme.public.currentUser+'/notifications">Notifications</a></li> <li><a href="'+FORUM_URL+'/u/'+robotshopTheme.public.currentUser+'/messages">Messages</a></li> <li><a href="'+FORUM_URL+'/u/'+robotshopTheme.public.currentUser+'/badges">My Badges</a></li><li class="default-active"><a href="'+FORUM_URL+'/u/'+robotshopTheme.public.currentUser+'/preferences/profile">Forum Profile</a></li> <li><a href="'+COMMUNITY_URL+'/logout">Log Out</a></li> </ul> </div>';
 			robotshopTheme.templatesHTML.sectionGrid = '<div id="rb-forum-grid"></div>';
 			robotshopTheme.templatesHTML.sectionGridContainer = '<div id="rb-forum-container"></div>';
