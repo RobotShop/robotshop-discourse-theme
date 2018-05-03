@@ -36,12 +36,12 @@
 		};
 		robotshopTheme.local.addBeforeBody = function() {
 			if(
-				$('body').hasClass('navigation-topics') ||
+				($('body').hasClass('navigation-topics') ||
 				$('body').hasClass('navigation-categories') ||
 				(
 					/*$("body[class*='c/help-support']").length &&*/
 					!$('body').hasClass('archetype-regular')
-				)
+				)) && !$('body').hasClass('admin-interface')
 			) {
 				if($('.hero-search-section-content').length === 0) {
 
