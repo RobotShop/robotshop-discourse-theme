@@ -35,13 +35,12 @@
 			robotshopTheme.local.manageUserNavActive();
 		};
 		robotshopTheme.local.addBeforeBody = function() {
-			if(
-				($('body').hasClass('navigation-topics') ||
-				$('body').hasClass('navigation-categories') ||
-				(
-					/*$("body[class*='c/help-support']").length &&*/
-					!$('body').hasClass('archetype-regular')
-				)) && !$('body').hasClass('admin-interface')
+			if (
+			    (
+			        ($('body').hasClass('navigation-topics') ||
+			        $('body').hasClass('navigation-categories')) &&
+			        !$('body').hasClass('archetype-regular')
+			    ) && !$('body').hasClass('admin-interface')
 			) {
 				if($('.hero-search-section-content').length === 0) {
 
@@ -89,12 +88,12 @@
 		};
 		robotshopTheme.local.manageUserPageBodyClass = function() {
 			if(
-				(__.$body.hasClass('user-summary-page') ||
-				__.$body.hasClass('user-activity-page') ||
-				__.$body.hasClass('user-notifications-page') ||
-				__.$body.hasClass('user-badges-page') ||
-				__.$body.hasClass('user-messages-page') ||
-				__.$body.hasClass('user-preferences-page')) &&
+				($('body').hasClass('user-summary-page') ||
+				$('body').hasClass('user-activity-page') ||
+				$('body').hasClass('user-notifications-page') ||
+				$('body').hasClass('user-badges-page') ||
+				$('body').hasClass('user-messages-page') ||
+				$('body').hasClass('user-preferences-page')) &&
 				window.location.href.indexOf($('#current-user > a').attr('href')) > -1
 			){
 				$('html').addClass('rb-user-pages');
