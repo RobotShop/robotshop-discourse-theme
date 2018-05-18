@@ -18,16 +18,27 @@
 		__.$window = $('window');
 		__.$document = $('document');
 
+		var cssFile = document.createElement("cssFile");
+
 		if (window.location.href.indexOf("www.robotshop.com") > -1) {
 			var FORUM_URL = 'https://www.robotshop.com/community/forum';
 			var COMMUNITY_URL = 'https://www.robotshop.com/community';
+			cssFile.href = "http://www.robotshop.com/community/web/build/styles/forum.css";
 		} else if (window.location.href.indexOf("staging.robotshop.com") > -1) {
 			var FORUM_URL = 'https://staging.robotshop.com/community/forum';
 			var COMMUNITY_URL = 'https://staging.robotshop.com/community';
+			cssFile.href = "http://staging.robotshop.com/community/web/build/styles/forum.css";
 		} else {
 			var FORUM_URL = 'http://devdiscourse.robotshop.com/community/forum';
 			var COMMUNITY_URL = 'http://devcommunity.robotshop.com/community';
+			cssFile.href = "http://devcommunity.robotshop.com/community/web/build/styles/forum.css";
 		}
+
+
+		cssFile.type = "text/css";
+		cssFile.rel = "stylesheet";
+		document.getElementsByTagName("head")[0].appendChild(cssFile);
+
 
 		robotshopTheme.local.wrapWithResponsiveGrid = function() {
 			$( "#main-outlet" ).wrap(robotshopTheme.templatesHTML.sectionGrid);
