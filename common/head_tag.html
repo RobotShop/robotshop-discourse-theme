@@ -1,5 +1,5 @@
 <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
-<link rel="stylesheet" type="text/css" href="http://staging.robotshop.com/community/web/build/styles/forum.css" />
+<link rel="stylesheet" type="text/css" href="/community/web/build/styles/forum.css" />
 
 <script type="text/javascript">
 	var robotshopTheme = {};
@@ -18,8 +18,6 @@
 		__.$window = $('window');
 		__.$document = $('document');
 
-		var cssFile = document.createElement("link");
-
 		if (window.location.href.indexOf("www.robotshop.com") > -1) {
 			var FORUM_URL = 'https://www.robotshop.com/community/forum';
 			var COMMUNITY_URL = 'https://www.robotshop.com/community';
@@ -31,13 +29,15 @@
 		} else {
 			var FORUM_URL = 'http://devdiscourse.robotshop.com/community/forum';
 			var COMMUNITY_URL = 'http://devcommunity.robotshop.com/community';
+
+			var cssFile = document.createElement("link");
 			cssFile.href = "http://devcommunity.robotshop.com/community/web/build/styles/forum.css";
+			cssFile.type = "text/css";
+			cssFile.rel = "stylesheet";
+			document.getElementsByTagName("head")[0].appendChild(cssFile);
 		}
 
 
-		cssFile.type = "text/css";
-		cssFile.rel = "stylesheet";
-		document.getElementsByTagName("head")[0].appendChild(cssFile);
 
 
 		robotshopTheme.local.wrapWithResponsiveGrid = function() {
