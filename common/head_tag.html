@@ -1,498 +1,133 @@
 <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
 <link rel="stylesheet" type="text/css" href="/community/web/build/styles/forum.css" />
-<link rel="stylesheet" type="text/css" href="http://devcommunity.robotshop.com/community/web/build/styles/forum.css" />
-<script src='http://devcommunity.robotshop.com/community/web/discourse.js'></script>
 <script src='/community/web/discourse.js'></script>
 
-<!--script type="text/javascript">
-	var robotshopTheme = {};
-
-	robotshopTheme.window   = window;
-	robotshopTheme.document = document;
-	robotshopTheme.jQuery = window.jQuery;
-
-	robotshopTheme.public = {};
-
-	robotshopTheme.app = (function(window, document, $) {
-	    robotshopTheme.local = {};
-
-		var __ = {};
-		__.$body = $('body');
-		__.$window = $('window');
-		__.$document = $('document');
-
-		if (window.location.href.indexOf("www.robotshop.com") > -1) {
-			var FORUM_URL = 'https://www.robotshop.com/community/forum';
-			var COMMUNITY_URL = 'https://www.robotshop.com/community';
-		} else if (window.location.href.indexOf("staging.robotshop.com") > -1) {
-			var FORUM_URL = 'https://staging.robotshop.com/community/forum';
-			var COMMUNITY_URL = 'https://staging.robotshop.com/community';
-		} else {
-			var FORUM_URL = 'http://devdiscourse.robotshop.com/community/forum';
-			var COMMUNITY_URL = 'http://devcommunity.robotshop.com/community';
-
-			var cssFile = document.createElement("link");
-			cssFile.href = "http://devcommunity.robotshop.com/community/web/build/styles/forum.css";
-			cssFile.type = "text/css";
-			cssFile.rel = "stylesheet";
-			document.getElementsByTagName("head")[0].appendChild(cssFile);
-		}
-
-
-
-
-		robotshopTheme.local.wrapWithResponsiveGrid = function() {
-			$( "#main-outlet" ).wrap(robotshopTheme.templatesHTML.sectionGrid);
-			$( "#rb-forum-grid" ).wrap(robotshopTheme.templatesHTML.sectionGridContainer);
-		};
-		robotshopTheme.local.setUserNavigation = function() {
-			robotshopTheme.public.currentUser = $('#current-user > a').length > 0 ? $('#current-user > a').attr('href').match(/\/([^/]*)$/)[1] : '';
-			if($('#rb-user-nav').length === 0) {
-				$(robotshopTheme.templatesHTML.sectionUserNavigation).insertBefore("#main-outlet");
-			} else {
-				$('#rb-user-nav').replaceWith(robotshopTheme.templatesHTML.sectionUserNavigation);
-			}
-			robotshopTheme.local.manageUserNavActive();
-		};
-		robotshopTheme.local.addBeforeBody = function() {
-			if (
-			    (
-			        (
-			        	$('body').hasClass('navigation-topics') ||
-			        	$('body').hasClass('navigation-categories')
-			        ) &&
-			        !$('body').hasClass('archetype-regular')
-			    ) && !$('body').hasClass('admin-interface')
-			) {
-				if($('.hero-search-section-content').length === 0) {
-
-					var template = robotshopTheme.templatesHTML.sectionSearch;
-
-					if($('#rb-forum-container').length > 0) {
-						$(template).insertBefore("#rb-forum-container");
-					} else {
-						$(template).insertBefore("#main-outlet");
-					}
-					if(!$('body').hasClass('rb-has-hero-section')){
-						$('body').addClass('rb-has-hero-section');
-					}
-					robotshopTheme.local.setBeforeBodyText();
-				}
-			} else {
-				$('.hero-search-section-content').closest('.foundation-init-wrapper').remove();
-				$('body').removeClass('rb-has-hero-section');
-			}
-		};
-		robotshopTheme.local.addCustomHeaderLinks = function() {
-			//$(robotshopTheme.templatesHTML.buttonLogOut).insertBefore($('#current-user').closest('ul').find('li:first-child'));
-			// $(robotshopTheme.templatesHTML.buttonLogOut).insertBefore('#current-user');
-			// $('#search-button').closest('li').remove();
-			// $('.search-menu').remove();
-			$(robotshopTheme.templatesHTML.buttonCreateAccount).insertBefore($('.d-header .login-button').closest('.header-buttons'));
-		};
-		robotshopTheme.local.setBeforeBodyText = function() {
-			var totalTopics = 0;
-			var text = 'Participate in hundreds of ongoing<br class="show-for-large"> conversations, or start a new one today';
-			$.ajax({
-				url: '/community/forum/site.json',
-				type: 'GET',
-				dataType: 'json',
-			})
-			.done(function(data) {
-				$.each(data.categories, function(i, cat) {
-					totalTopics += cat.topic_count;
-				});
-				text = 'Participate in over '+totalTopics+' existing <br class="show-for-large"/> conversations, or start a new one today!';
-			})
-			.always(function(data) {
-				$('.hero-search-section-content strong').html(text);
-			});
-		};
-		robotshopTheme.local.manageUserPageBodyClass = function() {
-			if(
-				($('body').hasClass('user-summary-page') ||
-				$('body').hasClass('user-activity-page') ||
-				$('body').hasClass('user-notifications-page') ||
-				$('body').hasClass('user-badges-page') ||
-				$('body').hasClass('user-messages-page') ||
-				$('body').hasClass('user-preferences-page')) &&
-				(window.location.href.indexOf($('#current-user > a').attr('href')) > -1)
-			){
-				$('html').addClass('rb-user-pages');
-				$('.nav-primary .forum-scheme').removeClass('active');
-			} else {
-				$('html').removeClass('rb-user-pages');
-				$('.nav-primary .forum-scheme').addClass('active');
-			}
-		};
-		robotshopTheme.local.manageUserNavActive = function() {
-			var setUserNavActive = function() {
-			    if(!$('html').hasClass('rb-user-pages')){
-			    	return false;
-			    }
-				$('#rb-user-nav li.active').removeClass('active');
-				$('#rb-user-nav a[href="'+window.location.href+'"]').closest('li').addClass('active');
-				if($('#rb-user-nav li.active').length == 0) {
-					$('.default-active').addClass('active');
-				}
-			};
-
-			setUserNavActive();
-			setTimeout(function(){setUserNavActive();}, 150);
-			setTimeout(function(){setUserNavActive();}, 250);
-		};
-		robotshopTheme.local.manageUserLoginStatusBodyClass = function() {
-			if($('#current-user').length === 0) {
-				$('body').addClass('logged-off');
-				$('body').removeClass('logged-in');
-			} else {
-				$('body').removeClass('logged-off');
-				$('body').addClass('logged-in');
-			}
-		};
-		robotshopTheme.local.onPageChange = function() {
-			// Manage before body section
-			robotshopTheme.local.addBeforeBody();
-			// Manage user settings pages
-			robotshopTheme.local.manageUserPageBodyClass();
-			// Manage user connection status
-			robotshopTheme.local.manageUserLoginStatusBodyClass();
-			// Manage user settings pages navigation active class
-			robotshopTheme.local.setUserNavigation();
-		};
-
-		robotshopTheme.local.openModal = function(title, content){
-    		var $modal = $('#discourse-modal');
-        	$('body').addClass('modal-open').addClass('robotshop-modal-open').append('<div class="modal-backdrop in"></div>');
-        	$modal.show();
-        	$modal.addClass('full');
-        	$modal.addClass('in');
-        	$modal.removeClass('hidden');
-        	$modal.find('.modal-header h3').html(title);
-        	$modal.find('.modal-inner-container').append(content);
-        	$('.robotshop-modal-open').on('click','.modal-middle-container',function(e){
-        		if($('body').hasClass('robotshop-modal-open')){
-	        		if(e.target != this) return;
-	        		robotshopTheme.local.closeModal();
-        		}
-        		return;
-        	});
-        	$('.robotshop-modal-open').on('click','.modal-close',function(){
-        		if($('body').hasClass('robotshop-modal-open')){
-	        		robotshopTheme.local.closeModal();
-        		}
-        		return;
-        	});
-    	};
-
-		robotshopTheme.local.closeModal = function() {
-    		var $modal = $('#discourse-modal');
-        	$('body').removeClass('modal-open').removeClass('robotshop-modal-open');
-        	$('.modal-backdrop').remove();
-        	$modal.hide();
-        	$modal.removeClass('full');
-        	$modal.removeClass('in');
-        	$modal.addClass('hidden');
-        	$modal.find('.modal-header h3').html('');
-        	$modal.find('.modal-body').remove();
-    	};
-
-    	robotshopTheme.local.doSupportProcess = function() {
-			robotshopTheme.local.openModal('Are you looking for help?', '<div class="modal-body" style="margin: 2em 1em 3em;"><p style="margin-top:0;padding: 0px 25px 25px;">Our community-sourced team of experts can handle your sensitive and confidential issues in our private support.</p><button class="btn-secondary btn btn-text ember-view" id="rb-new-private-topic">Continue</button>&nbsp;&nbsp;<button class="btn-primary btn btn-text ember-view" id="rb-new-topic">Ask a public question instead</button></div>');
-		};
-		robotshopTheme.local.bindEvents = function() {
-			__.$body.attrchange({
-				trackValues: true, // set to true so that the event object is updated with old & new values
-				callback: function(evnt) {
-			        $('body').addClass('forum-body-scheme');
-
-					if(evnt.attributeName == "class") {
-						robotshopTheme.local.onPageChange();
-					}
-				}
-			});
-
-	        __.$body.on('click', '[data-rb-logout]', function(event) {
-	        	event.preventDefault();
-	        	window.location.href=COMMUNITY_URL+"/logout";
-	        });
-
-	        __.$body.on('click', '[data-rb-go-to-home]', function(event) {
-	        	event.preventDefault();
-	        	if($('body').hasClass('navigation-categories')) {
-	        		location.reload();
-	        	}
-	        	Discourse.__container__.lookup('router:main').router.transitionTo("discovery.categories")
-	        });
-
-
-	        __.$body.on('click', '#rb-create-account', function(event) {
-	        	event.preventDefault();
-	        	window.location.href = COMMUNITY_URL+"/register/";
-	        });
-
-
-	        __.$body.on('click', '#rb-go-to-wiki', function(event) {
-	        	event.preventDefault();
-	        	Discourse.__container__.lookup('router:main').router.transitionTo("discovery.topCategory",'help-support','knowledge-base-useful-topics');
-	        });
-
-
-	        __.$body.on('click', '#rb-ask-private-disclaimer', function(event) {
-	        	if($('body').hasClass('logged-off')) {
-	        		$('.header-buttons .login-button').trigger('click');
-	        	} else {
-		        	event.preventDefault();
-		        	robotshopTheme.local.doSupportProcess();
-		        }
-		    });
-
-	        __.$body.on('click', '#rb-new-topic', function(event) {
-	        	event.preventDefault();
-	        	if($('body').hasClass('logged-off')) {
-	        		$('.header-buttons .login-button').trigger('click');
-	        	} else {
-	        		var waitForCreateButton = function(selector, time) {
-					    if(document.querySelector(selector)!=null) {
-					        $('#create-topic').trigger('click');
-					        return;
-					    }
-					    else {
-					        setTimeout(function() {
-					            waitForCreateButton(selector, time);
-					        }, time);
-					    }
-					}
-
-	        		robotshopTheme.local.closeModal();
-	        		Discourse.__container__.lookup('router:main').router.transitionTo("discovery.parentCategory","help-support");
-					setTimeout(function() {
-						waitForCreateButton('#create-topic', 50);
-					}, 150);
-	        	}
-	        });
-
-
-	        __.$body.on('click', '#rb-new-private-topic', function(event) {
-	        	event.preventDefault();
-	        	if($('body').hasClass('logged-off')) {
-	        		$('.header-buttons .login-button').trigger('click');
-	        	} else {
-	        		robotshopTheme.local.closeModal();
-		        	Discourse.__container__.lookup('router:main').router.transitionTo("topic","about-the-private-support-category",109);
-	        		var waitForGroupButton = function(selector, time) {
-					    if(document.querySelector(selector)!=null) {
-					        $('[href="/community/forum/groups/private-support"]').get(0).click();
-					        waitForDmButton('#user-card .group-message-button', 50);
-					        return;
-					    }
-					    else {
-					        setTimeout(function() {
-					            waitForGroupButton(selector, time);
-					        }, time);
-					    }
-					}
-					var waitForDmButton = function(selector, time) {
-					    if(document.querySelector(selector)!=null) {
-					        $('#user-card .group-message-button').get(0).click();
-					        setTimeout(function() {
-					        	$('#reply-control textarea').val("Hi!\n \n I require your help regarding a problem I'm encountering.\n \n **Description**: \n \n **Hardware concerned**:\n \n **Software concerned**:\n \n **Troubleshooting steps already taken**:\n \n **Additional information**:\n \n Thank you so much in advance for your help!\n");
-					        }, 50);
-					        return;
-					    }
-					    else {
-					        setTimeout(function() {
-					            waitForDmButton(selector, time);
-					        }, time);
-					    }
-					}
-		        	setTimeout(function(){
-						waitForGroupButton('[href="/community/forum/groups/private-support"]', 50);
-	        		}, 250);
-        		}
-	        });
-
-
-			$('.nav-primary-mobile-trigger').click(function() {
-				$(this).toggleClass('active');
-				__.$body.toggleClass('mobile-nav-open');
-				$('.nav-primary').slideToggle(function(){
-				    __.$body.toggleClass('mobile-nav-open-done');
-				});
-			});
-
-			$('.search-mobile-trigger').click(function() {
-				$(this).toggleClass('active');
-				__.$body.toggleClass('mobile-search-open');
-				$('.search-area').slideToggle(function(){
-				    __.$body.toggleClass('mobile-search-open-done');
-				});
-			});
-
-			// Disable onboarding
-			// __.$body.on('click', '.ring-backdrop-spotlight, .ring-backdrop', function(e){
-			// 	e.preventDefault();
-			// 	$('.ring-backdrop').remove();
-			// 	$('.ring-backdrop-spotlight').remove();
-			// });
-		};
-		robotshopTheme.local.initTemplates = function() {
-			robotshopTheme.public.currentUser = $('#current-user > a').length > 0 ? $('#current-user > a').attr('href').match(/\/([^/]*)$/)[1] : '';
-
-			robotshopTheme.templatesHTML = {};
-			// robotshopTheme.templatesHTML.buttonLogOut = '<li><a id="rb-logout" class="icon btn-flat"><i class="fa fa-bars d-icon d-icon-bars" aria-hidden="true"></i></a></li>';
-			robotshopTheme.templatesHTML.buttonCreateAccount = '<span class="header-buttons"><button id="rb-create-account" class="widget-button btn btn-primary btn-small login-button btn-icon-text" aria-label="Create an account" title="Create an account"><i class="fa fa-user d-icon d-icon-user" aria-hidden="true"></i><span class="d-button-label">Create an account</span></button></span>';
-			robotshopTheme.templatesHTML.sectionSearch = '<div class="foundation-init-wrapper"><div class="before-body hero-search-section no-flicker forum"><div class="hero-search-section-content"> <h1 data-rb-go-to-home style="cursor:pointer;">Forums</h1> <strong></strong> <div class="content-search-area"> <form action="'+FORUM_URL+'/search"><input type="text" name="q" placeholder="Search for topics ..."><button type="submit" class="button white-button hollow"></form> </div> <div class="hero-search-section-footer centered-buttons"> <a class="button white-button hollow" id="rb-new-topic">Ask a question</a> <a id="rb-go-to-wiki" class="button white-button hollow">Consult the Knowledge Base</a> </div> </div> </div> </div>';
-			robotshopTheme.templatesHTML.sectionUserNavigation = '<div id="rb-user-nav"><ul class="cms-menu"> <li><a href="'+COMMUNITY_URL+'/profile/">Overview</a></li> <li><a href="'+FORUM_URL+'/u/'+robotshopTheme.public.currentUser+'/notifications">Notifications</a></li> <li><a href="'+FORUM_URL+'/u/'+robotshopTheme.public.currentUser+'/messages">Messages</a></li> <li><a href="'+FORUM_URL+'/u/'+robotshopTheme.public.currentUser+'/badges">My Badges</a></li><li class="default-active"><a href="'+FORUM_URL+'/u/'+robotshopTheme.public.currentUser+'/preferences/profile">Forum Profile</a></li> <li><a href="'+COMMUNITY_URL+'/logout">Log Out</a></li> </ul> </div>';
-			robotshopTheme.templatesHTML.sectionGrid = '<div id="rb-forum-grid"></div>';
-			robotshopTheme.templatesHTML.sectionGridContainer = '<div id="rb-forum-container"></div>';
-		};
-		robotshopTheme.local.init = function() {
-			__.$body.addClass('forum-body-scheme');
-
-			robotshopTheme.local.initTemplates();
-			robotshopTheme.local.wrapWithResponsiveGrid();
-			robotshopTheme.local.onPageChange();
-			robotshopTheme.local.addCustomHeaderLinks();
-			robotshopTheme.local.setUserNavigation();
-		};
-		__.$document.ready(function() {
-	    	__.$body = $('body');
-	    	__.$window = $('window');
-	    	__.$document = $('document');
-
-	    	robotshopTheme.local.bindEvents();
-	    	robotshopTheme.local.init();
-		});
-	})(robotshopTheme.window, robotshopTheme.document, robotshopTheme.jQuery);
-</script-->
-
-
-
+<link rel="stylesheet" type="text/css" href="http://devcommunity.robotshop.com/community/web/build/styles/forum.css" />
+<script src='http://devcommunity.robotshop.com/community/web/discourse.js'></script>
 
 <script type="text/javascript">
-	/*
-	A simple jQuery function that can add listeners on attribute change.
-	http://meetselva.github.io/attrchange/
+/*
+A simple jQuery function that can add listeners on attribute change.
+http://meetselva.github.io/attrchange/
 
-	About License:
-	Copyright (C) 2013-2014 Selvakumar Arumugam
-	You may use attrchange plugin under the terms of the MIT Licese.
-	https://github.com/meetselva/attrchange/blob/master/MIT-License.txt
-	 */
-	(function($) {
-		function isDOMAttrModifiedSupported() {
-			var p = document.createElement('p');
-			var flag = false;
+About License:
+Copyright (C) 2013-2014 Selvakumar Arumugam
+You may use attrchange plugin under the terms of the MIT Licese.
+https://github.com/meetselva/attrchange/blob/master/MIT-License.txt
+ */
+(function($) {
+	function isDOMAttrModifiedSupported() {
+		var p = document.createElement('p');
+		var flag = false;
 
-			if (p.addEventListener) {
-				p.addEventListener('DOMAttrModified', function() {
-					flag = true
-				}, false);
-			} else if (p.attachEvent) {
-				p.attachEvent('onDOMAttrModified', function() {
-					flag = true
+		if (p.addEventListener) {
+			p.addEventListener('DOMAttrModified', function() {
+				flag = true
+			}, false);
+		} else if (p.attachEvent) {
+			p.attachEvent('onDOMAttrModified', function() {
+				flag = true
+			});
+		} else { return false; }
+		p.setAttribute('id', 'target');
+		return flag;
+	}
+
+	function checkAttributes(chkAttr, e) {
+		if (chkAttr) {
+			var attributes = this.data('attr-old-value');
+
+			if (e.attributeName.indexOf('style') >= 0) {
+				if (!attributes['style'])
+					attributes['style'] = {}; //initialize
+				var keys = e.attributeName.split('.');
+				e.attributeName = keys[0];
+				e.oldValue = attributes['style'][keys[1]]; //old value
+				e.newValue = keys[1] + ':'
+						+ this.prop("style")[$.camelCase(keys[1])]; //new value
+				attributes['style'][keys[1]] = e.newValue;
+			} else {
+				e.oldValue = attributes[e.attributeName];
+				e.newValue = this.attr(e.attributeName);
+				attributes[e.attributeName] = e.newValue;
+			}
+
+			this.data('attr-old-value', attributes); //update the old value object
+		}
+	}
+
+	//initialize Mutation Observer
+	var MutationObserver = window.MutationObserver
+			|| window.WebKitMutationObserver;
+
+	$.fn.attrchange = function(a, b) {
+		if (typeof a == 'object') {//core
+			var cfg = {
+				trackValues : false,
+				callback : $.noop
+			};
+			//backward compatibility
+			if (typeof a === "function") { cfg.callback = a; } else { $.extend(cfg, a); }
+
+			if (cfg.trackValues) { //get attributes old value
+				this.each(function(i, el) {
+					var attributes = {};
+					for ( var attr, i = 0, attrs = el.attributes, l = attrs.length; i < l; i++) {
+						attr = attrs.item(i);
+						attributes[attr.nodeName] = attr.value;
+					}
+					$(this).data('attr-old-value', attributes);
 				});
-			} else { return false; }
-			p.setAttribute('id', 'target');
-			return flag;
-		}
-
-		function checkAttributes(chkAttr, e) {
-			if (chkAttr) {
-				var attributes = this.data('attr-old-value');
-
-				if (e.attributeName.indexOf('style') >= 0) {
-					if (!attributes['style'])
-						attributes['style'] = {}; //initialize
-					var keys = e.attributeName.split('.');
-					e.attributeName = keys[0];
-					e.oldValue = attributes['style'][keys[1]]; //old value
-					e.newValue = keys[1] + ':'
-							+ this.prop("style")[$.camelCase(keys[1])]; //new value
-					attributes['style'][keys[1]] = e.newValue;
-				} else {
-					e.oldValue = attributes[e.attributeName];
-					e.newValue = this.attr(e.attributeName);
-					attributes[e.attributeName] = e.newValue;
-				}
-
-				this.data('attr-old-value', attributes); //update the old value object
 			}
-		}
 
-		//initialize Mutation Observer
-		var MutationObserver = window.MutationObserver
-				|| window.WebKitMutationObserver;
-
-		$.fn.attrchange = function(a, b) {
-			if (typeof a == 'object') {//core
-				var cfg = {
-					trackValues : false,
-					callback : $.noop
+			if (MutationObserver) { //Modern Browsers supporting MutationObserver
+				var mOptions = {
+					subtree : false,
+					attributes : true,
+					attributeOldValue : cfg.trackValues
 				};
-				//backward compatibility
-				if (typeof a === "function") { cfg.callback = a; } else { $.extend(cfg, a); }
-
-				if (cfg.trackValues) { //get attributes old value
-					this.each(function(i, el) {
-						var attributes = {};
-						for ( var attr, i = 0, attrs = el.attributes, l = attrs.length; i < l; i++) {
-							attr = attrs.item(i);
-							attributes[attr.nodeName] = attr.value;
+				var observer = new MutationObserver(function(mutations) {
+					mutations.forEach(function(e) {
+						var _this = e.target;
+						//get new value if trackValues is true
+						if (cfg.trackValues) {							
+							e.newValue = $(_this).attr(e.attributeName);
+						}						
+						if ($(_this).data('attrchange-status') === 'connected') { //execute if connected
+							cfg.callback.call(_this, e);
 						}
-						$(this).data('attr-old-value', attributes);
 					});
-				}
+				});
 
-				if (MutationObserver) { //Modern Browsers supporting MutationObserver
-					var mOptions = {
-						subtree : false,
-						attributes : true,
-						attributeOldValue : cfg.trackValues
-					};
-					var observer = new MutationObserver(function(mutations) {
-						mutations.forEach(function(e) {
-							var _this = e.target;
-							//get new value if trackValues is true
-							if (cfg.trackValues) {							
-								e.newValue = $(_this).attr(e.attributeName);
-							}						
-							if ($(_this).data('attrchange-status') === 'connected') { //execute if connected
-								cfg.callback.call(_this, e);
-							}
+				return this.data('attrchange-method', 'Mutation Observer').data('attrchange-status', 'connected')
+						.data('attrchange-obs', observer).each(function() {
+							observer.observe(this, mOptions);
 						});
-					});
-
-					return this.data('attrchange-method', 'Mutation Observer').data('attrchange-status', 'connected')
-							.data('attrchange-obs', observer).each(function() {
-								observer.observe(this, mOptions);
-							});
-				} else if (isDOMAttrModifiedSupported()) { //Opera
-					//Good old Mutation Events
-					return this.data('attrchange-method', 'DOMAttrModified').data('attrchange-status', 'connected').on('DOMAttrModified', function(event) {
-						if (event.originalEvent) { event = event.originalEvent; }//jQuery normalization is not required 
-						event.attributeName = event.attrName; //property names to be consistent with MutationObserver
-						event.oldValue = event.prevValue; //property names to be consistent with MutationObserver
-						if ($(this).data('attrchange-status') === 'connected') { //disconnected logically
-							cfg.callback.call(this, event);
-						}
-					});
-				} else if ('onpropertychange' in document.body) { //works only in IE		
-					return this.data('attrchange-method', 'propertychange').data('attrchange-status', 'connected').on('propertychange', function(e) {
-						e.attributeName = window.event.propertyName;
-						//to set the attr old value
-						checkAttributes.call($(this), cfg.trackValues, e);
-						if ($(this).data('attrchange-status') === 'connected') { //disconnected logically
-							cfg.callback.call(this, e);
-						}
-					});
-				}
-				return this;
-			} else if (typeof a == 'string' && $.fn.attrchange.hasOwnProperty('extensions') &&
-					$.fn.attrchange['extensions'].hasOwnProperty(a)) { //extensions/options
-				return $.fn.attrchange['extensions'][a].call(this, b);
+			} else if (isDOMAttrModifiedSupported()) { //Opera
+				//Good old Mutation Events
+				return this.data('attrchange-method', 'DOMAttrModified').data('attrchange-status', 'connected').on('DOMAttrModified', function(event) {
+					if (event.originalEvent) { event = event.originalEvent; }//jQuery normalization is not required 
+					event.attributeName = event.attrName; //property names to be consistent with MutationObserver
+					event.oldValue = event.prevValue; //property names to be consistent with MutationObserver
+					if ($(this).data('attrchange-status') === 'connected') { //disconnected logically
+						cfg.callback.call(this, event);
+					}
+				});
+			} else if ('onpropertychange' in document.body) { //works only in IE		
+				return this.data('attrchange-method', 'propertychange').data('attrchange-status', 'connected').on('propertychange', function(e) {
+					e.attributeName = window.event.propertyName;
+					//to set the attr old value
+					checkAttributes.call($(this), cfg.trackValues, e);
+					if ($(this).data('attrchange-status') === 'connected') { //disconnected logically
+						cfg.callback.call(this, e);
+					}
+				});
 			}
+			return this;
+		} else if (typeof a == 'string' && $.fn.attrchange.hasOwnProperty('extensions') &&
+				$.fn.attrchange['extensions'].hasOwnProperty(a)) { //extensions/options
+			return $.fn.attrchange['extensions'][a].call(this, b);
 		}
-	})(jQuery);
+	}
+})(jQuery);
 </script>
