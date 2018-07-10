@@ -75,3 +75,28 @@ header .button, footer .button {
 footer img {
 	display: none;
 }
+
+.social-icons {
+	display: inline-block;
+	overflow: hidden;
+	width: 32px;
+	height: 32px;
+	margin-right: .5em;
+	background-image: url("/community/web/build/images/common/sprite-social.png");
+	text-indent: -9000px; }
+.social-icons.social-icon-twitter {
+	background-position: 0 0; }
+.social-icons.social-icon-facebook {
+	background-position: -64px 0; }
+.social-icons.social-icon-youtube {
+	background-position: -128px 0; }
+.social-icons.social-icon-mail {
+	background-position: -256px 0; }
+.social-icons.social-icon-blog {
+	background-position: -192px 0; }
+.social-icons.social-icon-instagram {
+	background-position: -320px 0; }
+.social-icons.social-icon-slack {
+	background-position: -384px 0; }
+.social-icons.social-icon-rss {
+	background-image: url("/community/web/build/images/common/icon-rss.png"); }
