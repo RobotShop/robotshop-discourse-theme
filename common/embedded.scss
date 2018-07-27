@@ -1,24 +1,15 @@
 a {
 	color: #545454;
 }
+
 a:active, a:hover, a:visited {
 	color: #545454;
 }
 
-// .tutorials {
-// 	a {
-// 		color: #009638;
-// 	}
-// }
-
-// .robots {
-// 	a {
-// 		color: #0b889e;
-// 	}
-// }
 html {
 	background-color: transparent;
 }
+
 .cooked a, .d-editor-preview a {
 	color: #b82101;
 }
@@ -26,8 +17,9 @@ html {
 a.post-replies {
 	color: #545454;
 }
+
 article.post {
-	border-bottom: 1px solid #ddd;
+	border-bottom: 1px solid #dddddd;
 	font-size: 16px;
 }
 
@@ -36,7 +28,7 @@ article.post.deleted {
 }
 
 article.post .post-date {
-	color: #aaa;
+	color: #aaaaaa;
 }
 
 .username {
@@ -44,8 +36,8 @@ article.post .post-date {
 }
 
 .username a {
-	color: #0a0a0a !important;
 	background-color: transparent !important;
+	color: #0a0a0a !important;
 }
 
 .username a.new-user {
@@ -65,13 +57,15 @@ article.post .post-date {
 }
 
 header .button, footer .button {
-	color: white !important;
-	background-color: #0a0a0a !important;
 	padding: 8px 28px;
-    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
+	border-radius: 4px;
+	box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .2);
+	background-color: #0a0a0a !important;
+	color: white !important;
 }
 
 footer img {
 	display: none;
 }
+
+
