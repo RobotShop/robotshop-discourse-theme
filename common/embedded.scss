@@ -1,82 +1,79 @@
 
-.category-list img.category-logo { display: none !important;}
-
 .category-heading p a {
-	color: #b82101;
+  color: #b82101 !important;
 }
 
-.post-stream .topic-post .cooked a {
-	color: #b82101;
+.post-stream .topic-post .cooked a, #messageList a {
+  color: #b82101 !important;
 }
 
 a {
-	color: #545454;
+  color: #545454;
 }
 
 a:active, a:hover, a:visited {
-	color: #545454;
+  color: #545454;
 }
 
 html {
-	background-color: transparent;
+  background-color: transparent;
 }
 
 .cooked a, .d-editor-preview a {
-	color: #b82101;
+  color: #b82101;
 }
 
 a.post-replies {
-	color: #545454;
+  color: #545454;
 }
 
 article.post {
-	border-bottom: 1px solid #dddddd;
-	font-size: 16px;
+  border-bottom: 1px solid #dddddd;
+  font-size: 16px;
 }
 
 article.post.deleted {
-	background-color: #ffe5e5;
+  background-color: #ffe5e5;
 }
 
 article.post .post-date {
-	color: #aaaaaa;
+  color: #aaaaaa;
 }
 
 .username {
-	margin-bottom: .25em;
+  margin-bottom: .25em;
 }
 
 .username a {
-	background-color: transparent !important;
-	color: #0a0a0a !important;
+  background-color: transparent !important;
+  color: #0a0a0a !important;
 }
 
 .username a.new-user {
-	color: #0a0a0a;
+  color: #0a0a0a;
 }
 
 .username span.title {
-	color: #0a0a0a;
+  color: #0a0a0a;
 }
 
 .in-reply-to {
-	color: #0a0a0a;
+  color: #0a0a0a;
 }
 
 .replies {
-	color: #0a0a0a;
+  color: #0a0a0a;
 }
 
 header .button, footer .button {
-	padding: 8px 28px;
-	border-radius: 4px;
-	box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .2);
-	background-color: #0a0a0a !important;
-	color: white !important;
+  padding: 8px 28px;
+  border-radius: 4px;
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .2);
+  background-color: #0a0a0a !important;
+  color: white !important;
 }
 
 footer img {
-	display: none;
+  display: none;
 }
-
 
