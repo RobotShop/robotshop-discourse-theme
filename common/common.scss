@@ -5,3 +5,11 @@
 #slackClient #messageList a {
   color: #b82101 !important;
 }
+
+.cooked a {
+  text-decoration: underline !important;
+  color: #b82101 !important;
+}
+.cooked a:visited {
+  color: #791500 !important;
+}
