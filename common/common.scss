@@ -16,3 +16,8 @@
 .similar-topics, .composer-popup {
 	background: #f5f5f5 !important;
 }
+
+section.user-main > ul >li:first-child > a {
+	display:none;
+}
+    
