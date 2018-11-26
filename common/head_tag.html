@@ -1,9 +1,9 @@
 <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
-<link rel="stylesheet" type="text/css" href="/community/web/build/styles/forum.css" />
-<script src='/community/web/discourse.js'></script>
+<link rel="stylesheet" type="text/css" href="/community/web/build/styles/forum.css?v=622" />
+<script src='/community/web/discourse.js?v=622'></script>
 
-<script src="/community/web/assets/slack/rbSlack.min.js" defer></script>
-<link rel="stylesheet" type="text/css" href="/community/web/assets/slack/rbSlack.min.css" >
+<script src="/community/web/assets/slack/rbSlack.min.js?v=622" defer></script>
+<link rel="stylesheet" type="text/css" href="/community/web/assets/slack/rbSlack.min.css?v=622" >
 
 <script type="text/javascript">
 		var channelList = {"C5TPR99UP":{"name":"#general", "sendMessageHook":"T5A4W3Y2K/B766NMGHH/TnHYBUbdouKBtwivqiq69sRf", "botId" : "B766NMGHH"},"C59BN890C":{"name":"#announcements", "sendMessageHook":"T5A4W3Y2K/B775LT1FY/dYDEHCif2XPTRrA1kQ9SoeHo", "botId" : "B775LT1FY"},"C5SCAAFBK":{"name":"#help", "sendMessageHook":"T5A4W3Y2K/B76D18ME1/ZtwHX27IjxMdpaCohWXIqpJZ", "botId" : "B76D18ME1"},"C5SC9HSV7":{"name":"#projects", "sendMessageHook":"T5A4W3Y2K/B766RA1J7/l7JPrQWc0zUMM3sHruKybkgR", "botId" : "B766RA1J7"},"C7DP7AKDL":{"name":"#robotics-news", "sendMessageHook":"T5A4W3Y2K/B7DD26TC1/6daK6pURY28YB8J2DsL75JD1", "botId" : "B7DD26TC1"}}; </script>
@@ -57,6 +57,26 @@ https://github.com/meetselva/attrchange/blob/master/MIT-License.txt
 
 			this.data('attr-old-value', attributes); //update the old value object
 		}
+	}
+	
+	function ChangeLink()
+	{
+        let local =  jQuery("section.user-main > ul >li:first-child > a");
+        if (local.length>0)
+        {
+            local.attr("href", "/community/profile");
+            let local2 = local.clone();
+            local2.attr("id","");
+            let parent = local.closest("li");
+            console.log(parent);
+            local.remove();
+            parent.append(local2);
+        }
+        else
+        {
+            console.log("timeout...");
+            setTimeout(function(){ChangeLink();}, 500);
+        }
 	}
 
 	//initialize Mutation Observer
@@ -132,5 +152,11 @@ https://github.com/meetselva/attrchange/blob/master/MIT-License.txt
 			return $.fn.attrchange['extensions'][a].call(this, b);
 		}
 	}
+	
+	jQuery(document).ready(function(){
+       ChangeLink(); 
+    });
+	
 })(jQuery);
+
 </script>
