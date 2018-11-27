@@ -58,26 +58,6 @@ https://github.com/meetselva/attrchange/blob/master/MIT-License.txt
 			this.data('attr-old-value', attributes); //update the old value object
 		}
 	}
-	
-	function ChangeLink()
-	{
-        let local =  jQuery("section.user-main > ul >li:first-child > a");
-        if (local.length>0)
-        {
-            local.attr("href", "/community/profile");
-            let local2 = local.clone();
-            local2.attr("id","");
-            let parent = local.closest("li");
-            console.log(parent);
-            local.remove();
-            parent.append(local2);
-        }
-        else
-        {
-            console.log("timeout...");
-            setTimeout(function(){ChangeLink();}, 500);
-        }
-	}
 
 	//initialize Mutation Observer
 	var MutationObserver = window.MutationObserver
@@ -152,11 +132,7 @@ https://github.com/meetselva/attrchange/blob/master/MIT-License.txt
 			return $.fn.attrchange['extensions'][a].call(this, b);
 		}
 	}
-	
-	jQuery(document).ready(function(){
-       ChangeLink(); 
-    });
-	
+		
 })(jQuery);
 
 </script>

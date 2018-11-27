@@ -16,3 +16,23 @@
 .similar-topics, .composer-popup {
 	background: #f5f5f5 !important;
 }
+
+.desktop-view .d-header .contents {
+    top: -113px !important;
+} 
+
+.desktop-view body.rb-has-hero-section .d-header .contents{
+    top: -83px !important;
+}
+
+
+.mobile-view #topic-progress-wrapper {
+	right: 5px !important;
+    bottom: 39px !important;
+}
+
+
+.mobile-view .d-header .contents {
+    top: 1.5em !important;
+    right: 4px !important;
+} 
