@@ -25,7 +25,6 @@
     top: -83px !important;
 }
 
-
 .mobile-view #topic-progress-wrapper {
 	right: 5px !important;
     bottom: 39px !important;
@@ -36,3 +35,8 @@
     top: 1.5em !important;
     right: 4px !important;
 } 
+
+.mobile-view .docked .d-header .contents ul.d-header-icons
+{
+    margin:0 1em 0 5px;
+}
