@@ -40,3 +40,24 @@
 {
     margin:0 1em 0 5px;
 }
+
+.categories-list .category-logo.aspect-image {
+  width: auto;
+  display: block;
+}
+.categories-list .category-logo.aspect-image img {
+  width: auto;
+}
+
+
+.category-letsmakerobots.categories-list .category-logo.aspect-image {
+  width: 100%;
+  max-width: 100%;
+  display: block;
+}
+.category-letsmakerobots.categories-list .category-logo.aspect-image img {
+  width: auto;
+}
+.category-heading a {
+  color: #ce2501;
+}
