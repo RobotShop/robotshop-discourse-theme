@@ -1,3 +1,40 @@
+<script type="text/discourse-plugin" version="0.8.23">
+var computed = require("ember-addons/ember-computed-decorators").default;
+api.modifyClass('controller:composer', {
+    @computed("model.categoryId", "lastValidatedAt")
+    categoryValidation(categoryId, lastValidatedAt) {
+        var InputValidation = require("discourse/models/input-validation").default;
+        var categoryNb = $('.category-input .category-chooser .selected-name > span').length;
+        if( this.get('model').draftKey == "new_topic" && (categoryNb !== 0 && categoryNb < 2)  ) {
+            return InputValidation.create({
+                failed: true,
+                reason: 'You need to select a subcategory',
+                lastShownAt: lastValidatedAt
+              });
+             $('.category-input .category-chooser .combo-box-header').click();
+        } else {
+            return this._super(categoryId, lastValidatedAt);
+        }
+    }
+});
+</script>
+
+<script type="text/discourse-plugin" version="0.8.23">
+api.reopenWidget("header-dropdown", {
+  html(attrs) {
+    var h = require("virtual-dom").h;
+    if (attrs.icon == 'bars') {
+        return h('a.icon.btn-flat#toggle-hamburger-menu', "Forum Options");
+    } else if (attrs.icon == 'search') {
+        return h('a.icon.btn-flat', "");
+    } else {
+        return this._super(attrs);
+    }
+  }
+});
+</script>
+
+
 <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
 <link rel="stylesheet" type="text/css" href="/community/web/build/styles/forum.css?v=628" />
 <script src='/community/web/discourse.js?v=628'></script>
