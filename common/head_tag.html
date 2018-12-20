@@ -1,22 +1,31 @@
 <script type="text/discourse-plugin" version="0.8.23">
 var computed = require("ember-addons/ember-computed-decorators").default;
-api.modifyClass('controller:composer', {
-    @computed("model.categoryId", "lastValidatedAt")
-    categoryValidation(categoryId, lastValidatedAt) {
-        var InputValidation = require("discourse/models/input-validation").default;
+api.modifyClass('controller:composer',
+    {
+      save(opts) {
         var categoryNb = $('.category-input .category-chooser .selected-name > span').length;
-        if( this.get('model').draftKey == "new_topic" && (categoryNb !== 0 && categoryNb < 2)  ) {
-            return InputValidation.create({
-                failed: true,
-                reason: 'You need to select a subcategory',
-                lastShownAt: lastValidatedAt
-              });
-             $('.category-input .category-chooser .combo-box-header').click();
-        } else {
-            return this._super(categoryId, lastValidatedAt);
+        if((categoryNb !== 0 && categoryNb < 2)  ) {
+            this.set("lastValidatedAt", Date.now());
+            return false;
         }
-    }
-});
+        return this._super(opts);
+      },
+      @computed("model.categoryId", "lastValidatedAt")
+      categoryValidation(categoryId, lastValidatedAt) {
+          var InputValidation = require("discourse/models/input-validation").default;
+          var categoryNb = $('.category-input .category-chooser .selected-name > span').length;
+          if( (categoryNb !== 0 && categoryNb < 2)  ) {
+              return InputValidation.create({
+                  failed: true,
+                  reason: 'You need to select a subcategory',
+                  lastShownAt: lastValidatedAt
+                });
+          } else {
+              return this._super(categoryId, lastValidatedAt);
+          }
+      }
+  }
+);
 </script>
 
 <script type="text/discourse-plugin" version="0.8.23">
