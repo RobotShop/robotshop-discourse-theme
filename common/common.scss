@@ -74,3 +74,7 @@
 #reply-control .select-kit.combo-box.category-chooser .select-kit-row[data-value='36'] {
   display: none;
 }
+
+.mobile-view .docked .d-header .extra-info-wrapper .topic-header-extra, .mobile-view .docked .d-header .extra-info-wrapper .topic-header-extra .discourse-tags .discourse-tag {
+  color: white !important;
+}
