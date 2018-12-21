@@ -61,3 +61,15 @@
 .category-heading a {
   color: #ce2501;
 }
+
+#reply-control .select-kit.combo-box.category-chooser .select-kit-row[data-value='2'],
+#reply-control .select-kit.combo-box.category-chooser .select-kit-row[data-value='4'],
+#reply-control .select-kit.combo-box.category-chooser .select-kit-row[data-value='8'],
+#reply-control .select-kit.combo-box.category-chooser .select-kit-row[data-value='9'],
+#reply-control .select-kit.combo-box.category-chooser .select-kit-row[data-value='10'],
+#reply-control .select-kit.combo-box.category-chooser .select-kit-row[data-value='12'],
+#reply-control .select-kit.combo-box.category-chooser .select-kit-row[data-value='13'],
+#reply-control .select-kit.combo-box.category-chooser .select-kit-row[data-value='14'],
+#reply-control .select-kit.combo-box.category-chooser .select-kit-row[data-value='13'] {
+  display: none;
+}
