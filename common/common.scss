@@ -78,3 +78,8 @@
 .mobile-view .docked .d-header .extra-info-wrapper .topic-header-extra, .mobile-view .docked .d-header .extra-info-wrapper .topic-header-extra .discourse-tags .discourse-tag {
   color: white !important;
 }
+
+#main-outlet #banner {
+    max-width: 99%;
+    background: transparent;
+}
