@@ -75,6 +75,34 @@
   display: none;
 }
 
+.edit-topic-title .select-kit.combo-box.category-chooser .select-kit-row[data-value='2'],
+.edit-topic-title .select-kit.combo-box.category-chooser .select-kit-row[data-value='4'],
+.edit-topic-title .select-kit.combo-box.category-chooser .select-kit-row[data-value='8'],
+.edit-topic-title .select-kit.combo-box.category-chooser .select-kit-row[data-value='9'],
+.edit-topic-title .select-kit.combo-box.category-chooser .select-kit-row[data-value='10'],
+.edit-topic-title .select-kit.combo-box.category-chooser .select-kit-row[data-value='12'],
+.edit-topic-title .select-kit.combo-box.category-chooser .select-kit-row[data-value='13'],
+.edit-topic-title .select-kit.combo-box.category-chooser .select-kit-row[data-value='14'],
+.edit-topic-title .select-kit.combo-box.category-chooser .select-kit-row[data-value='13'],
+.edit-topic-title .select-kit.combo-box.category-chooser .select-kit-row[data-value='36'] {
+  display: none;
+}
+
+
+.staff .edit-topic-title .select-kit.combo-box.category-chooser .select-kit-row[data-value='2'],
+.staff .edit-topic-title .select-kit.combo-box.category-chooser .select-kit-row[data-value='4'],
+.staff .edit-topic-title .select-kit.combo-box.category-chooser .select-kit-row[data-value='8'],
+.staff .edit-topic-title .select-kit.combo-box.category-chooser .select-kit-row[data-value='9'],
+.staff .edit-topic-title .select-kit.combo-box.category-chooser .select-kit-row[data-value='10'],
+.staff .edit-topic-title .select-kit.combo-box.category-chooser .select-kit-row[data-value='12'],
+.staff .edit-topic-title .select-kit.combo-box.category-chooser .select-kit-row[data-value='13'],
+.staff .edit-topic-title .select-kit.combo-box.category-chooser .select-kit-row[data-value='14'],
+.staff .edit-topic-title .select-kit.combo-box.category-chooser .select-kit-row[data-value='13'],
+.staff .edit-topic-title .select-kit.combo-box.category-chooser .select-kit-row[data-value='36'] {
+  display: block;
+}
+
+
 .mobile-view .docked .d-header .extra-info-wrapper .topic-header-extra, .mobile-view .docked .d-header .extra-info-wrapper .topic-header-extra .discourse-tags .discourse-tag {
   color: white !important;
 }
