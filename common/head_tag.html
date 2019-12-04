@@ -12,7 +12,7 @@ api.modifyClass('controller:composer',
       },
       @computed("model.categoryId", "lastValidatedAt")
       categoryValidation(categoryId, lastValidatedAt) {
-          var InputValidation = require("discourse/models/input-validation").default;
+          var InputValidation = require("@ember/object").default;
           var categoryNb = $('.category-input .category-chooser .selected-name > span').length;
           if( (categoryNb !== 0 && categoryNb < 2)  ) {
               return InputValidation.create({
