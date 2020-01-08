@@ -103,6 +103,30 @@
 }
 
 
+.category-list .subcategories .badge-wrapper[href="/community/forum/c/community/news"],
+table.category-list [data-category-id="142"],
+.category-list .subcategories .badge-wrapper[href="/community/forum/c/community/blog"],
+table.category-list [data-category-id="11"],
+.category-list .subcategories .badge-wrapper[href="/community/forum/c/community/tutorials"],
+table.category-list [data-category-id="9"],
+.category-list .subcategories .badge-wrapper[href="/community/forum/c/community/robots"],
+table.category-list [data-category-id="8"]
+{
+  display: none;
+}
+
+.staff .category-list .subcategories .badge-wrapper[href="/community/forum/c/community/news"],
+.staff table.category-list [data-category-id="142"],
+.staff .category-list .subcategories .badge-wrapper[href="/community/forum/c/community/blog"],
+.staff table.category-list [data-category-id="11"],
+.staff .category-list .subcategories .badge-wrapper[href="/community/forum/c/community/tutorials"],
+.staff table.category-list [data-category-id="9"],
+.staff .category-list .subcategories .badge-wrapper[href="/community/forum/c/community/robots"],
+.staff table.category-list [data-category-id="8"]
+{
+  display: block;
+}
+
 .mobile-view .docked .d-header .extra-info-wrapper .topic-header-extra, .mobile-view .docked .d-header .extra-info-wrapper .topic-header-extra .discourse-tags .discourse-tag {
   color: white !important;
 }
