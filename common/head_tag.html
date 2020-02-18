@@ -3,7 +3,7 @@ var computed = require("ember-addons/ember-computed-decorators").default;
 api.modifyClass('controller:composer',
     {
       save(opts) {
-        var categoryNb = $('.category-input .category-chooser .selected-name > span').length;
+        var categoryNb = $('.category-input .category-chooser .selected-name > span.name > span.badge-wrapper').length;
         if((categoryNb !== 0 && categoryNb < 2)  ) {
             this.set("lastValidatedAt", Date.now());
             return false;
@@ -13,7 +13,7 @@ api.modifyClass('controller:composer',
       @computed("model.categoryId", "lastValidatedAt")
       categoryValidation(categoryId, lastValidatedAt) {
           var InputValidation = require("@ember/object").default;
-          var categoryNb = $('.category-input .category-chooser .selected-name > span').length;
+          var categoryNb = $('.category-input .category-chooser .selected-name > span.name > span.badge-wrapper').length;
           if( (categoryNb !== 0 && categoryNb < 2)  ) {
               return InputValidation.create({
                   failed: true,
