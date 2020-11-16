@@ -18,7 +18,7 @@
 }
 
 .desktop-view .d-header .contents {
-    top: -113px !important;
+    top: -80px !important;
 } 
 
 .desktop-view body.rb-has-hero-section .d-header .contents{
@@ -30,6 +30,9 @@
     bottom: 39px !important;
 }
 
+#toggle-hamburger-menu {
+    width:2.2857em !important;
+}
 
 .mobile-view .d-header .contents {
     top: 1.5em !important;
@@ -40,6 +43,12 @@
 {
     margin:0 1em 0 5px;
 }
+
+.mobile-view .d-header-icons {
+    top: -75px !important;
+    right: -25px !important;
+} 
+
 
 .categories-list .category-logo.aspect-image {
   width: auto;
@@ -113,6 +122,11 @@ table.category-list [data-category-id="9"],
 table.category-list [data-category-id="8"]  
 { 
   display: none;  
+}
+
+
+li.header-dropdown-toggle.search-dropdown{
+    display:none !important;
 }
 
 .mobile-view .docked .d-header .extra-info-wrapper .topic-header-extra, .mobile-view .docked .d-header .extra-info-wrapper .topic-header-extra .discourse-tags .discourse-tag {
