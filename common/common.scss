@@ -163,3 +163,14 @@ img[src*="http://www.robotshop.com/community/forum/uploads/"]{
 #reply-control.open {
 max-height: unset !important;
 }
+
+
+#user-card
+{
+	display:none;
+}
+
+#user-card.rbvisible
+{
+	display:inline-block;
+}
