@@ -159,3 +159,7 @@ img[src*="http://www.robotshop.com/community/forum/uploads/"]{
 	display:none;
 }
     
+	
+#reply-control.open {
+max-height: unset !important;
+}
