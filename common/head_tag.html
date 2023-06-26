@@ -181,7 +181,7 @@ https://github.com/meetselva/attrchange/blob/master/MIT-License.txt
 
 $(document).ready(function(){
 	console.log("ready!")
-	$(".modal-backdrop").click(
+	$(document).on("click", ".modal-backdrop"
 	function(){
 		console.log("click");
 		$(".fixed-modal").hide(); 
