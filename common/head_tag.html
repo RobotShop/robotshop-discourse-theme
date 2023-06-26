@@ -189,6 +189,25 @@ setTimeout(function(){
 		$(".modal-backdrop").hide(); 
 		console.log("done");	
 	});
+	
+	$(document).on("click", ".modal-middle-container",
+	function(){
+		console.log("click");
+		$(".fixed-modal").hide(); 
+		$(".modal-backdrop").hide(); 
+		console.log("done");	
+	
+	});
+	
+	
+	$(document).on("click", ".fixed-modal",
+	function(){
+		console.log("click");
+		$(".fixed-modal").hide(); 
+		$(".modal-backdrop").hide(); 
+		console.log("done");	
+	});
+	
 	}, 50);
 });
 
