@@ -184,12 +184,28 @@ setTimeout(function(){
 	console.log("ready!")
 	$(document).on("click", ".modal-backdrop",
 	function(){
-		console.log("click");
-		$(".fixed-modal").hide(); 
-		$(".modal-backdrop").hide(); 
-		console.log("done");	
+		robotshopTheme.local.closeModal();
 	});
-		
+	
+	$(document).on("click", ".modal-middle-container",
+	function(){
+	
+	if ($(event.target).hasClass(".modal-middle-container"))
+	{	
+		robotshopTheme.local.closeModal();
+    }
+	
+	});
+	
+	
+	$(document).on("click", ".fixed-modal",
+	function(){
+		if ($(event.target).hasClass(".fixed-modal"))
+	{	
+		robotshopTheme.local.closeModal();
+    }
+	});
+	
 	}, 50);
 });
 
