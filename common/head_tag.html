@@ -46,7 +46,7 @@ api.reopenWidget("header-dropdown", {
 
 <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700" rel="stylesheet">
 <link rel="stylesheet" type="text/css" href="//community.robotshop.com/web/build/styles/forum.css?v=202306" />
-<script src='//community.robotshop.com/web/discourse.js?v=202306'></script>
+<script src='//community.robotshop.com/web/discourse.js?v=202306a'></script>
 
 <script src="//community.robotshop.com/web/assets/slack/rbSlack.min.js?v=202306" defer></script>
 <link rel="stylesheet" type="text/css" href="//community.robotshop.com/web/assets/slack/rbSlack.min.css?v=202306" >
@@ -182,7 +182,7 @@ https://github.com/meetselva/attrchange/blob/master/MIT-License.txt
 $(document).ready(function(){
 setTimeout(function(){
 	console.log("ready!")
-	$(document).on("click", ".modal-backdrop"
+	$(document).on("click", ".modal-backdrop",
 	function(){
 		console.log("click");
 		$(".fixed-modal").hide(); 
