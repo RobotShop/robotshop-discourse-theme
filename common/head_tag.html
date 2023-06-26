@@ -180,6 +180,7 @@ https://github.com/meetselva/attrchange/blob/master/MIT-License.txt
 
 
 $(document).ready(function(){
+setTimeout(function(){
 	console.log("ready!")
 	$(document).on("click", ".modal-backdrop"
 	function(){
@@ -188,6 +189,7 @@ $(document).ready(function(){
 		$(".modal-backdrop").hide(); 
 		console.log("done");	
 	});
+	}, 50);
 });
 
 console.log("checkpoint");
