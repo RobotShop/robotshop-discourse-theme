@@ -43,18 +43,13 @@ api.reopenWidget("header-dropdown", {
 });
 </script>
 
-<style>
-#toggle-hamburger-menu { color: #75777c !important;}
-
-.desktop-view .d-header .contents .header-buttons button { color: #75777c !important; }
-</style>
 
 <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700" rel="stylesheet">
-<link rel="stylesheet" type="text/css" href="//community-stg.robotshop.com/web/build/styles/forum.css?v=202306b" />
-<script src='//community-stg.robotshop.com/web/discourse.js?v=20230531b'></script>
+<link rel="stylesheet" type="text/css" href="//community.robotshop.com/web/build/styles/forum.css?v=202306" />
+<script src='//community.robotshop.com/web/discourse.js?v=202306a'></script>
 
-<script src="//community-stg.robotshop.com/web/assets/slack/rbSlack.min.js?v=202210b" defer></script>
-<link rel="stylesheet" type="text/css" href="//community.robotshop.com/web/assets/slack/rbSlack.min.css?v=202306b" >
+<script src="//community.robotshop.com/web/assets/slack/rbSlack.min.js?v=202306" defer></script>
+<link rel="stylesheet" type="text/css" href="//community.robotshop.com/web/assets/slack/rbSlack.min.css?v=202306" >
 
 <script type="text/javascript">
 /*
@@ -182,5 +177,38 @@ https://github.com/meetselva/attrchange/blob/master/MIT-License.txt
 	}
 		
 })(jQuery);
+
+
+$(document).ready(function(){
+setTimeout(function(){
+	console.log("ready!")
+	$(document).on("click", ".modal-backdrop",
+	function(){
+		robotshopTheme.local.closeModal();
+	});
+	
+	$(document).on("click", ".modal-middle-container",
+	function(){
+	
+	if ($(event.target).hasClass(".modal-middle-container"))
+	{	
+		robotshopTheme.local.closeModal();
+    }
+	
+	});
+	
+	
+	$(document).on("click", ".fixed-modal",
+	function(){
+		if ($(event.target).hasClass(".fixed-modal"))
+	{	
+		robotshopTheme.local.closeModal();
+    }
+	});
+	
+	}, 50);
+});
+
+console.log("checkpoint");
 
 </script>
