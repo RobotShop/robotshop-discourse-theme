@@ -1,0 +1,155 @@
+name: Deploy theme
+
+# This repository has nothing to build. "Deploying" it means telling the target
+# Discourse instance to pull this branch — the thing an admin used to do by
+# hand under Customize -> Themes -> Check for Updates.
+#
+#   push to `staging` -> staging forum,    theme 11
+#   push to `master`  -> production forum, theme 7
+#
+# The theme id is per-forum and the two are NOT interchangeable. The staging
+# forum also carries a theme with id 7 (an old copy that tracks `master` and is
+# tens of commits behind), so a job pointed at the wrong id would return a
+# perfectly green 200 having updated something nobody looks at. The case
+# statement below is the only place that pairing is written down.
+on:
+  push:
+    branches:
+      - staging
+      - master
+
+permissions:
+  contents: read
+
+# One update at a time per branch. `update_from_remote` pulls the branch *tip*,
+# not the commit that triggered the run, so when two pushes land together only
+# the newest run can tell the truth about what is deployed — the older one would
+# verify its own SHA against the newer one's and go red for no reason.
+# Cancelling it is correct: it has been superseded, not failed.
+concurrency:
+  group: theme-deploy-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Update the forum theme
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve the target forum
+        id: target
+        run: |
+          set -euo pipefail
+          case "${GITHUB_REF_NAME}" in
+            staging)
+              FORUM_URL="https://community-stg.robotshop.com/forum"
+              THEME_ID="11"
+              ENV_NAME="staging"
+              ;;
+            master)
+              FORUM_URL="https://community.robotshop.com/forum"
+              THEME_ID="7"
+              ENV_NAME="production"
+              ;;
+            *)
+              echo "::error::No forum is mapped to branch '${GITHUB_REF_NAME}'. Add it to the case statement in .github/workflows/deploy-theme.yml or remove the branch from the push trigger."
+              exit 1
+              ;;
+          esac
+          {
+            echo "forum_url=${FORUM_URL}"
+            echo "theme_id=${THEME_ID}"
+            echo "env_name=${ENV_NAME}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Update the theme on the forum
+        env:
+          FORUM_URL: ${{ steps.target.outputs.forum_url }}
+          THEME_ID: ${{ steps.target.outputs.theme_id }}
+          ENV_NAME: ${{ steps.target.outputs.env_name }}
+          # Both keys are exposed and the branch picks one below, rather than
+          # selecting with a `&&`/`||` expression: that idiom silently falls
+          # through to the right-hand side when the left secret is empty, which
+          # would deploy production's push using staging's key.
+          STAGING_API_KEY: ${{ secrets.DISCOURSE_STAGING_API_KEY }}
+          PRODUCTION_API_KEY: ${{ secrets.DISCOURSE_PRODUCTION_API_KEY }}
+          CF_AUTOMATION_HEADER: ${{ secrets.CF_AUTOMATION_HEADER }}
+        run: |
+          set -euo pipefail
+
+          case "${GITHUB_REF_NAME}" in
+            staging) API_KEY="${STAGING_API_KEY}" ;;
+            master)  API_KEY="${PRODUCTION_API_KEY}" ;;
+          esac
+
+          if [ -z "${API_KEY}" ]; then
+            echo "::error::The Discourse API key secret for ${ENV_NAME} is unset. See README.md -> Automatic deployment."
+            exit 1
+          fi
+          if [ -z "${CF_AUTOMATION_HEADER}" ]; then
+            echo "::error::CF_AUTOMATION_HEADER is unset. The production forum sits behind Cloudflare bot protection and answers 403 to a runner without it. See README.md -> Automatic deployment."
+            exit 1
+          fi
+
+          echo "Updating theme ${THEME_ID} on the ${ENV_NAME} forum at ${FORUM_URL}"
+          echo "  branch ${GITHUB_REF_NAME}, commit ${GITHUB_SHA}"
+
+          # curl reads both secrets from a 0600 file rather than argv, so they
+          # never appear in the runner's process table. GitHub masks registered
+          # secrets in the log, but the process table is not the log.
+          CFG="${RUNNER_TEMP}/curl.cfg"
+          ( umask 077; : > "${CFG}" )
+          {
+            printf 'header = "Api-Key: %s"\n' "${API_KEY}"
+            printf 'header = "X-RS-Automation: %s"\n' "${CF_AUTOMATION_HEADER}"
+            printf 'header = "Content-Type: application/json"\n'
+          } >> "${CFG}"
+
+          BODY="${RUNNER_TEMP}/response.json"
+          STATUS=$(curl --silent --show-error --config "${CFG}" \
+            --request PUT \
+            --data '{"theme":{"remote_update":true}}' \
+            --max-time 180 \
+            --output "${BODY}" \
+            --write-out '%{http_code}' \
+            "${FORUM_URL}/admin/themes/${THEME_ID}.json") || STATUS="000"
+
+          rm -f "${CFG}"
+
+          if [ "${STATUS}" != "200" ]; then
+            echo "::error::The ${ENV_NAME} forum answered HTTP ${STATUS} for theme ${THEME_ID}. 403 means Cloudflare rejected the runner (check CF_AUTOMATION_HEADER); 404 means the API key was rejected; 400 means the theme id does not exist on that forum; 000 means the request never completed."
+            echo "--- response body ---"
+            head -c 2000 "${BODY}" 2>/dev/null || true
+            echo
+            exit 1
+          fi
+
+          # HTTP 200 is not proof of an update. Discourse answers 200 for a
+          # no-op, and for a pull that failed in a way `update_from_remote`
+          # swallowed. The only honest evidence is the commit the theme now
+          # sits on, which must be the one this run deployed.
+          LOCAL_VERSION=$(jq -r '.theme.remote_theme.local_version // empty' "${BODY}")
+          REMOTE_URL=$(jq -r '.theme.remote_theme.remote_url // empty' "${BODY}")
+          THEME_NAME=$(jq -r '.theme.name // empty' "${BODY}")
+
+          if [ -z "${LOCAL_VERSION}" ]; then
+            echo "::error::Theme ${THEME_ID} on the ${ENV_NAME} forum reported no remote version. It is probably not a git-backed theme, so nothing here can deploy it."
+            exit 1
+          fi
+
+          echo "Theme ${THEME_ID} (\"${THEME_NAME}\") tracks ${REMOTE_URL}"
+          echo "Theme is now at ${LOCAL_VERSION}"
+
+          if [ "${LOCAL_VERSION}" != "${GITHUB_SHA}" ]; then
+            echo "::error::The forum returned success but theme ${THEME_ID} is at ${LOCAL_VERSION}, not the ${GITHUB_SHA} this run deployed. The forum did not pull this commit."
+            exit 1
+          fi
+
+          {
+            echo "Updated theme **${THEME_ID}** (\"${THEME_NAME}\") on the **${ENV_NAME}** forum."
+            echo ""
+            echo "| | |"
+            echo "| -- | -- |"
+            echo "| Forum | ${FORUM_URL} |"
+            echo "| Branch | \`${GITHUB_REF_NAME}\` |"
+            echo "| Commit now live on the theme | \`${LOCAL_VERSION}\` |"
+          } >> "${GITHUB_STEP_SUMMARY}"
