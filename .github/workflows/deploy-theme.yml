@@ -109,10 +109,18 @@ jobs:
           # `raise_on_import_error: true` is what makes a broken pull fail
           # loudly. Without it Discourse swallows the error and the theme
           # silently stays where it was.
+          # `raise_on_import_error: true` is what makes a broken pull fail
+          # loudly; it is the last keyword of `RemoteTheme#update_from_remote`,
+          # verified in app/models/remote_theme.rb inside the container.
+          #
+          # It is necessary and not sufficient. Discourse can advance
+          # `local_version` to the new sha and still record a partial import in
+          # `last_error_text` — the git pointer moved, the theme content did
+          # not. Reading that field is the difference between "the repository
+          # was pulled" and "the theme is what this commit says it is".
           REMOTE_SCRIPT=$(cat <<'EOS'
           set -eu
-          cd /data/www/discourse
-          docker exec -e THEME_ID="__THEME_ID__" app rails runner "t = Theme.find(ENV['THEME_ID'].to_i); rt = t.remote_theme; abort('theme is not git-backed, nothing here can deploy it') if rt.nil?; rt.update_from_remote(raise_on_import_error: true); rt.save!; t.save!; puts 'THEME_LOCAL_VERSION=' + rt.reload.local_version.to_s; puts 'THEME_NAME=' + t.name.to_s"
+          docker exec -e THEME_ID="__THEME_ID__" app rails runner "t = Theme.find(ENV['THEME_ID'].to_i); rt = t.remote_theme; abort('theme is not git-backed, nothing here can deploy it') if rt.nil?; rt.update_from_remote(raise_on_import_error: true); rt.save!; t.save!; rt.reload; abort('discourse recorded an import error: ' + rt.last_error_text.to_s) if rt.last_error_text.present?; puts 'THEME_LOCAL_VERSION=' + rt.local_version.to_s; puts 'THEME_COMMITS_BEHIND=' + rt.commits_behind.to_s; puts 'THEME_NAME=' + t.name.to_s"
           EOS
           )
           REMOTE_SCRIPT="${REMOTE_SCRIPT//__THEME_ID__/${THEME_ID}}"
