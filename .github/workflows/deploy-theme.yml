@@ -10,8 +10,27 @@ name: Deploy theme
 # The theme id is per-forum and the two are NOT interchangeable. The staging
 # forum also carries a theme with id 7 (an old copy that tracks `master` and is
 # tens of commits behind), so a job pointed at the wrong id would return a
-# perfectly green 200 having updated something nobody looks at. The case
+# perfectly green result having updated something nobody looks at. The case
 # statement below is the only place that pairing is written down.
+#
+# ---------------------------------------------------------------------------
+# Why this goes through AWS SSM instead of calling the forum over the internet
+# ---------------------------------------------------------------------------
+# A GitHub runner cannot reach either forum. Cloudflare answers it with
+# `403 / error code 1006` — "banned IP" — emitted by the zone's IP Access
+# Rules, which are evaluated BEFORE the WAF custom rules. The
+# `X-RS-Automation` header that lets our other automations through is a WAF
+# skip rule, so it never gets a chance to apply. This is not a credentials
+# problem: the identical request from the corporate network returns 200.
+#
+# So the request is made from the box itself, which is on the inside. It never
+# crosses Cloudflare, and nothing has to be opened to the public internet.
+#
+# And because we are already on the box, we skip HTTP altogether and drive
+# Discourse through its own Rails console. That removes the Discourse admin API
+# keys from this repository entirely — there is no key to leak, rotate, or
+# accidentally print, and none to sit in SSM command history where anyone with
+# console access could read it back for 30 days.
 on:
   push:
     branches:
@@ -30,6 +49,9 @@ concurrency:
   group: theme-deploy-${{ github.ref_name }}
   cancel-in-progress: true
 
+env:
+  AWS_REGION: us-east-1
+
 jobs:
   deploy:
     name: Update the forum theme
@@ -41,12 +63,12 @@ jobs:
           set -euo pipefail
           case "${GITHUB_REF_NAME}" in
             staging)
-              FORUM_URL="https://community-stg.robotshop.com/forum"
+              INSTANCE_TAG="community-staging"
               THEME_ID="11"
               ENV_NAME="staging"
               ;;
             master)
-              FORUM_URL="https://community.robotshop.com/forum"
+              INSTANCE_TAG="discourse-production"
               THEME_ID="7"
               ENV_NAME="production"
               ;;
@@ -56,91 +78,135 @@ jobs:
               ;;
           esac
           {
-            echo "forum_url=${FORUM_URL}"
+            echo "instance_tag=${INSTANCE_TAG}"
             echo "theme_id=${THEME_ID}"
             echo "env_name=${ENV_NAME}"
           } >> "$GITHUB_OUTPUT"
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
       - name: Update the theme on the forum
         env:
-          FORUM_URL: ${{ steps.target.outputs.forum_url }}
+          INSTANCE_TAG: ${{ steps.target.outputs.instance_tag }}
           THEME_ID: ${{ steps.target.outputs.theme_id }}
           ENV_NAME: ${{ steps.target.outputs.env_name }}
-          # Both keys are exposed and the branch picks one below, rather than
-          # selecting with a `&&`/`||` expression: that idiom silently falls
-          # through to the right-hand side when the left secret is empty, which
-          # would deploy production's push using staging's key.
-          STAGING_API_KEY: ${{ secrets.DISCOURSE_STAGING_API_KEY }}
-          PRODUCTION_API_KEY: ${{ secrets.DISCOURSE_PRODUCTION_API_KEY }}
-          CF_AUTOMATION_HEADER: ${{ secrets.CF_AUTOMATION_HEADER }}
         run: |
           set -euo pipefail
 
-          case "${GITHUB_REF_NAME}" in
-            staging) API_KEY="${STAGING_API_KEY}" ;;
-            master)  API_KEY="${PRODUCTION_API_KEY}" ;;
-          esac
-
-          if [ -z "${API_KEY}" ]; then
-            echo "::error::The Discourse API key secret for ${ENV_NAME} is unset. See README.md -> Automatic deployment."
-            exit 1
-          fi
-          if [ -z "${CF_AUTOMATION_HEADER}" ]; then
-            echo "::error::CF_AUTOMATION_HEADER is unset. The production forum sits behind Cloudflare bot protection and answers 403 to a runner without it. See README.md -> Automatic deployment."
-            exit 1
-          fi
-
-          echo "Updating theme ${THEME_ID} on the ${ENV_NAME} forum at ${FORUM_URL}"
+          echo "Updating theme ${THEME_ID} on the ${ENV_NAME} forum (instances tagged Role=${INSTANCE_TAG})"
           echo "  branch ${GITHUB_REF_NAME}, commit ${GITHUB_SHA}"
 
-          # curl reads both secrets from a 0600 file rather than argv, so they
-          # never appear in the runner's process table. GitHub masks registered
-          # secrets in the log, but the process table is not the log.
-          CFG="${RUNNER_TEMP}/curl.cfg"
-          ( umask 077; : > "${CFG}" )
-          {
-            printf 'header = "Api-Key: %s"\n' "${API_KEY}"
-            printf 'header = "X-RS-Automation: %s"\n' "${CF_AUTOMATION_HEADER}"
-            printf 'header = "Content-Type: application/json"\n'
-          } >> "${CFG}"
+          # The script that runs on the box. Every Ruby string below is single
+          # quoted on purpose: the whole thing travels shell -> JSON -> SSM ->
+          # shell -> docker -> ruby, and a double quote would have to survive
+          # five layers of escaping intact.
+          #
+          # `raise_on_import_error: true` is what makes a broken pull fail
+          # loudly. Without it Discourse swallows the error and the theme
+          # silently stays where it was.
+          REMOTE_SCRIPT=$(cat <<'EOS'
+          set -eu
+          cd /data/www/discourse
+          docker exec -e THEME_ID="__THEME_ID__" app rails runner "t = Theme.find(ENV['THEME_ID'].to_i); rt = t.remote_theme; abort('theme is not git-backed, nothing here can deploy it') if rt.nil?; rt.update_from_remote(raise_on_import_error: true); rt.save!; t.save!; puts 'THEME_LOCAL_VERSION=' + rt.reload.local_version.to_s; puts 'THEME_NAME=' + t.name.to_s"
+          EOS
+          )
+          REMOTE_SCRIPT="${REMOTE_SCRIPT//__THEME_ID__/${THEME_ID}}"
 
-          BODY="${RUNNER_TEMP}/response.json"
-          STATUS=$(curl --silent --show-error --config "${CFG}" \
-            --request PUT \
-            --data '{"theme":{"remote_update":true}}' \
-            --max-time 180 \
-            --output "${BODY}" \
-            --write-out '%{http_code}' \
-            "${FORUM_URL}/admin/themes/${THEME_ID}.json") || STATUS="000"
+          # jq builds the parameters rather than hand-written escaping. The
+          # remote script contains quotes and brackets; assembling that JSON by
+          # string concatenation is how a workflow ends up sending a command
+          # that is syntactically valid and semantically wrong.
+          PARAMS=$(jq -n --arg s "$REMOTE_SCRIPT" '{commands: ($s | rtrimstr("\n") | split("\n"))}')
 
-          rm -f "${CFG}"
+          CMD_ID=$(aws ssm send-command \
+            --region "${AWS_REGION}" \
+            --targets "Key=tag:Role,Values=${INSTANCE_TAG}" \
+            --document-name "AWS-RunShellScript" \
+            --comment "Deploy theme ${THEME_ID} (${ENV_NAME}) sha=${GITHUB_SHA}" \
+            --timeout-seconds 600 \
+            --cloud-watch-output-config "CloudWatchOutputEnabled=false" \
+            --parameters "${PARAMS}" \
+            --query 'Command.CommandId' --output text)
 
-          if [ "${STATUS}" != "200" ]; then
-            echo "::error::The ${ENV_NAME} forum answered HTTP ${STATUS} for theme ${THEME_ID}. 403 means Cloudflare rejected the runner (check CF_AUTOMATION_HEADER); 404 means the API key was rejected; 400 means the theme id does not exist on that forum; 000 means the request never completed."
-            echo "--- response body ---"
-            head -c 2000 "${BODY}" 2>/dev/null || true
-            echo
+          echo "SSM command ${CMD_ID} sent."
+
+          # Poll to a terminal state. `send-command` returning a command id
+          # means the request was accepted, nothing more — the remote script
+          # has not run yet, let alone succeeded. Treating that as success is
+          # the failure mode this whole loop exists to prevent.
+          STATUS="Pending"
+          for _ in $(seq 1 60); do
+            sleep 5
+            INVOCATION=$(aws ssm list-command-invocations \
+              --region "${AWS_REGION}" \
+              --command-id "${CMD_ID}" \
+              --details \
+              --output json)
+            COUNT=$(echo "${INVOCATION}" | jq '.CommandInvocations | length')
+            if [ "${COUNT}" -eq 0 ]; then
+              continue
+            fi
+            if [ "${COUNT}" -gt 1 ]; then
+              echo "::error::${COUNT} instances are tagged Role=${INSTANCE_TAG}. This workflow updates one forum and cannot choose between them. Fix the tags, or target an instance id."
+              exit 1
+            fi
+            STATUS=$(echo "${INVOCATION}" | jq -r '.CommandInvocations[0].Status')
+            case "${STATUS}" in
+              Pending|InProgress|Delayed|Cancelling) ;;
+              *) break ;;
+            esac
+          done
+
+          # No invocation at all means the tag matched no running instance, so
+          # the command was accepted and delivered to nobody. Without this the
+          # loop would time out and report "status Pending", which sends the
+          # reader looking at SSM instead of at the tags.
+          if [ "$(echo "${INVOCATION}" | jq '.CommandInvocations | length')" -eq 0 ]; then
+            echo "::error::No running instance is tagged Role=${INSTANCE_TAG}, so the command reached nothing. Check the tag on the ${ENV_NAME} forum instance."
             exit 1
           fi
 
-          # HTTP 200 is not proof of an update. Discourse answers 200 for a
-          # no-op, and for a pull that failed in a way `update_from_remote`
-          # swallowed. The only honest evidence is the commit the theme now
-          # sits on, which must be the one this run deployed.
-          LOCAL_VERSION=$(jq -r '.theme.remote_theme.local_version // empty' "${BODY}")
-          REMOTE_URL=$(jq -r '.theme.remote_theme.remote_url // empty' "${BODY}")
-          THEME_NAME=$(jq -r '.theme.name // empty' "${BODY}")
+          RESPONSE_CODE=$(echo "${INVOCATION}" | jq -r '.CommandInvocations[0].CommandPlugins[0].ResponseCode // "null"')
+          OUTPUT=$(echo "${INVOCATION}" | jq -r '.CommandInvocations[0].CommandPlugins[0].Output // ""')
+
+          echo "--- output from the box ---"
+          echo "${OUTPUT}"
+          echo "---------------------------"
+
+          if [ "${STATUS}" != "Success" ]; then
+            echo "::error::The SSM command finished with status ${STATUS} (remote exit code ${RESPONSE_CODE}). The theme was not updated."
+            exit 1
+          fi
+
+          # Belt and braces: SSM reports Success only when the exit code is 0,
+          # but reading the code directly means a future change to that
+          # behaviour cannot turn a failure green without anyone noticing.
+          if [ "${RESPONSE_CODE}" != "0" ]; then
+            echo "::error::The remote script exited ${RESPONSE_CODE} even though SSM reported ${STATUS}. Treating this as a failure."
+            exit 1
+          fi
+
+          LOCAL_VERSION=$(echo "${OUTPUT}" | sed -n 's/^THEME_LOCAL_VERSION=//p' | tail -1)
+          THEME_NAME=$(echo "${OUTPUT}" | sed -n 's/^THEME_NAME=//p' | tail -1)
 
           if [ -z "${LOCAL_VERSION}" ]; then
-            echo "::error::Theme ${THEME_ID} on the ${ENV_NAME} forum reported no remote version. It is probably not a git-backed theme, so nothing here can deploy it."
+            echo "::error::The remote script succeeded but printed no theme version. Nothing here can confirm what the forum is serving."
             exit 1
           fi
 
-          echo "Theme ${THEME_ID} (\"${THEME_NAME}\") tracks ${REMOTE_URL}"
-          echo "Theme is now at ${LOCAL_VERSION}"
+          echo "Theme ${THEME_ID} (\"${THEME_NAME}\") is now at ${LOCAL_VERSION}"
 
+          # A zero exit code is not proof of a deployment. Discourse reports
+          # success for a no-op, and for a pull that failed in a way it
+          # swallowed. The only honest evidence is the commit the theme now
+          # sits on, which must be the one this run deployed.
           if [ "${LOCAL_VERSION}" != "${GITHUB_SHA}" ]; then
-            echo "::error::The forum returned success but theme ${THEME_ID} is at ${LOCAL_VERSION}, not the ${GITHUB_SHA} this run deployed. The forum did not pull this commit."
+            echo "::error::The update reported success but theme ${THEME_ID} is at ${LOCAL_VERSION}, not the ${GITHUB_SHA} this run deployed. The forum did not pull this commit."
             exit 1
           fi
 
@@ -149,7 +215,7 @@ jobs:
             echo ""
             echo "| | |"
             echo "| -- | -- |"
-            echo "| Forum | ${FORUM_URL} |"
+            echo "| Instances tagged | \`Role=${INSTANCE_TAG}\` |"
             echo "| Branch | \`${GITHUB_REF_NAME}\` |"
             echo "| Commit now live on the theme | \`${LOCAL_VERSION}\` |"
           } >> "${GITHUB_STEP_SUMMARY}"
