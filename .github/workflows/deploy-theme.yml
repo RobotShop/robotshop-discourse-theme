@@ -1,0 +1,310 @@
+name: Deploy theme
+
+# This repository has nothing to build. "Deploying" it means telling the target
+# Discourse instance to pull this branch — the thing an admin used to do by
+# hand under Customize -> Themes -> Check for Updates.
+#
+#   push to `staging` -> staging forum,    theme 11
+#   push to `master`  -> production forum, theme 7
+#
+# The theme id is per-forum and the two are NOT interchangeable. The staging
+# forum also carries a theme with id 7 (an old copy that tracks `master` and is
+# tens of commits behind), so a job pointed at the wrong id would return a
+# perfectly green result having updated something nobody looks at. The case
+# statement below is the only place that pairing is written down.
+#
+# ---------------------------------------------------------------------------
+# Why this goes through AWS SSM instead of calling the forum over the internet
+# ---------------------------------------------------------------------------
+# A GitHub runner cannot reach either forum. Cloudflare answers it with
+# `403 / error code 1006` — "banned IP" — emitted by the zone's IP Access
+# Rules, which are evaluated BEFORE the WAF custom rules. The
+# `X-RS-Automation` header that lets our other automations through is a WAF
+# skip rule, so it never gets a chance to apply. This is not a credentials
+# problem: the identical request from the corporate network returns 200.
+#
+# So the request is made from the box itself, which is on the inside. It never
+# crosses Cloudflare, and nothing has to be opened to the public internet.
+#
+# And because we are already on the box, we skip HTTP altogether and drive
+# Discourse through its own Rails console. That removes the Discourse admin API
+# keys from this repository entirely — there is no key to leak, rotate, or
+# accidentally print, and none to sit in SSM command history where anyone with
+# console access could read it back for 30 days.
+on:
+  push:
+    branches:
+      - staging
+      - master
+  # Every false-red path below is recoverable by re-running the deploy for a ref
+  # that has not moved. Without this the only way to retry is an empty commit.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One update at a time per branch. `update_from_remote` pulls the branch *tip*,
+# not the commit that triggered the run, so when two pushes land together only
+# the newest run can tell the truth about what is deployed — the older one would
+# verify its own SHA against the newer one's and go red for no reason.
+# Cancelling it is correct: it has been superseded, not failed.
+concurrency:
+  group: theme-deploy-${{ github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  deploy:
+    name: Update the forum theme
+    runs-on: ubuntu-latest
+    # The production gate (COMM-40, option B). A job-level environment is
+    # evaluated BEFORE the first step runs, so on `master` this run sits in
+    # "Waiting" until a required reviewer approves it — no AWS credentials are
+    # configured, no SSM command is sent, nothing touches the production forum.
+    # On `staging` it resolves to an environment with no protection rules and
+    # the run proceeds unchanged.
+    #
+    # This is the project's delivery rule applied to the theme: everything
+    # reaches staging on its own, nothing reaches production without a human.
+    # Before it, a push to `master` here deployed the production forum with
+    # nobody looking — and because the SSM script is built from repository
+    # content, whoever could push could run it as root on that box.
+    #
+    # Naming the environments also gives option A its seam: once a second IAM
+    # user exists, its keys go in the `production` environment's secrets and
+    # the `staging` ones stay in `staging`, with no `if` anywhere in this file.
+    environment: ${{ github.ref_name == 'master' && 'production' || 'staging' }}
+    steps:
+      - name: Resolve the target forum
+        id: target
+        run: |
+          set -euo pipefail
+          case "${GITHUB_REF_NAME}" in
+            staging)
+              INSTANCE_TAG="community-staging"
+              THEME_ID="11"
+              ENV_NAME="staging"
+              ;;
+            master)
+              INSTANCE_TAG="discourse-production"
+              THEME_ID="7"
+              ENV_NAME="production"
+              ;;
+            *)
+              echo "::error::No forum is mapped to branch '${GITHUB_REF_NAME}'. Add it to the case statement in .github/workflows/deploy-theme.yml or remove the branch from the push trigger."
+              exit 1
+              ;;
+          esac
+          {
+            echo "instance_tag=${INSTANCE_TAG}"
+            echo "theme_id=${THEME_ID}"
+            echo "env_name=${ENV_NAME}"
+          } >> "$GITHUB_OUTPUT"
+
+      # Needed only to settle one question: when the forum ends up on a commit
+      # that is not this run's, is it a *newer* one? Answering that needs the
+      # branch's history, so the checkout is deliberate rather than habitual.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update the theme on the forum
+        env:
+          INSTANCE_TAG: ${{ steps.target.outputs.instance_tag }}
+          THEME_ID: ${{ steps.target.outputs.theme_id }}
+          ENV_NAME: ${{ steps.target.outputs.env_name }}
+        run: |
+          set -euo pipefail
+
+          echo "Updating theme ${THEME_ID} on the ${ENV_NAME} forum (instances tagged Role=${INSTANCE_TAG})"
+          echo "  branch ${GITHUB_REF_NAME}, commit ${GITHUB_SHA}"
+
+          # The script that runs on the box. Every Ruby string below is single
+          # quoted on purpose: the whole thing travels shell -> JSON -> SSM ->
+          # shell -> docker -> ruby, and a double quote would have to survive
+          # five layers of escaping intact.
+          #
+          # `raise_on_import_error: true` is what makes a broken pull fail
+          # loudly. Without it Discourse swallows the error and the theme
+          # silently stays where it was.
+          # `raise_on_import_error: true` is what makes a broken pull fail
+          # loudly; it is the last keyword of `RemoteTheme#update_from_remote`,
+          # verified in app/models/remote_theme.rb inside the container.
+          #
+          # It is necessary and not sufficient. Discourse can advance
+          # `local_version` to the new sha and still record a partial import in
+          # `last_error_text` — the git pointer moved, the theme content did
+          # not. Reading that field is the difference between "the repository
+          # was pulled" and "the theme is what this commit says it is".
+          REMOTE_SCRIPT=$(cat <<'EOS'
+          set -eu
+          docker exec -e THEME_ID="__THEME_ID__" app rails runner "t = Theme.find(ENV['THEME_ID'].to_i); rt = t.remote_theme; abort('theme is not git-backed, nothing here can deploy it') if rt.nil?; rt.update_from_remote(raise_on_import_error: true); rt.save!; t.save!; rt.reload; abort('discourse recorded an import error: ' + rt.last_error_text.to_s) if rt.last_error_text.present?; puts 'THEME_LOCAL_VERSION=' + rt.local_version.to_s; puts 'THEME_COMMITS_BEHIND=' + rt.commits_behind.to_s; puts 'THEME_NAME=' + t.name.to_s"
+          EOS
+          )
+          REMOTE_SCRIPT="${REMOTE_SCRIPT//__THEME_ID__/${THEME_ID}}"
+
+          # jq builds the parameters rather than hand-written escaping. The
+          # remote script contains quotes and brackets; assembling that JSON by
+          # string concatenation is how a workflow ends up sending a command
+          # that is syntactically valid and semantically wrong.
+          PARAMS=$(jq -n --arg s "$REMOTE_SCRIPT" '{commands: ($s | rtrimstr("\n") | split("\n"))}')
+
+          CMD_ID=$(aws ssm send-command \
+            --region "${AWS_REGION}" \
+            --targets "Key=tag:Role,Values=${INSTANCE_TAG}" \
+            --document-name "AWS-RunShellScript" \
+            --comment "Deploy theme ${THEME_ID} (${ENV_NAME}) sha=${GITHUB_SHA}" \
+            --timeout-seconds 600 \
+            --cloud-watch-output-config "CloudWatchOutputEnabled=false" \
+            --parameters "${PARAMS}" \
+            --query 'Command.CommandId' --output text)
+
+          echo "SSM command ${CMD_ID} sent."
+
+          # Poll to a terminal state. `send-command` returning a command id
+          # means the request was accepted, nothing more — the remote script
+          # has not run yet, let alone succeeded. Treating that as success is
+          # the failure mode this whole loop exists to prevent.
+          #
+          # The budget matches --timeout-seconds below on purpose. A loop that
+          # gives up earlier than SSM does reports failure for a command that is
+          # still running and about to succeed: a red run over a deployed forum,
+          # which is the most expensive kind of wrong.
+          STATUS="Pending"
+          INVOCATIONS='{"CommandInvocations":[]}'
+          for _ in $(seq 1 120); do
+            sleep 5
+            INVOCATIONS=$(aws ssm list-command-invocations \
+              --region "${AWS_REGION}" \
+              --command-id "${CMD_ID}" \
+              --output json)
+            if [ "$(echo "${INVOCATIONS}" | jq '.CommandInvocations | length')" -eq 0 ]; then
+              continue
+            fi
+            STATUS=$(echo "${INVOCATIONS}" | jq -r '.CommandInvocations[0].Status')
+            case "${STATUS}" in
+              Pending|InProgress|Delayed|Cancelling) ;;
+              *) break ;;
+            esac
+          done
+
+          # Re-read the list once the command is settled, and only then count.
+          # Invocation records appear with eventual consistency, so counting
+          # inside the loop can break out on instance A before instance B's
+          # record exists — a green run while a second, untracked box has also
+          # executed a command as root. Counting here cannot be skipped.
+          INVOCATIONS=$(aws ssm list-command-invocations \
+            --region "${AWS_REGION}" \
+            --command-id "${CMD_ID}" \
+            --output json)
+          COUNT=$(echo "${INVOCATIONS}" | jq '.CommandInvocations | length')
+
+          # No invocation at all means the tag matched no running instance, so
+          # the command was accepted and delivered to nobody. Without this the
+          # loop would time out and report "status Pending", which sends the
+          # reader looking at SSM instead of at the tags.
+          if [ "${COUNT}" -eq 0 ]; then
+            echo "::error::No running instance is tagged Role=${INSTANCE_TAG}, so the command reached nothing. Check the tag on the ${ENV_NAME} forum instance."
+            exit 1
+          fi
+          if [ "${COUNT}" -gt 1 ]; then
+            echo "::error::${COUNT} instances are tagged Role=${INSTANCE_TAG}. This workflow updates one forum and cannot choose between them, and every match has already run a command as root. Fix the tags, or target an instance id."
+            exit 1
+          fi
+
+          INSTANCE_ID=$(echo "${INVOCATIONS}" | jq -r '.CommandInvocations[0].InstanceId')
+
+          # `list-command-invocations --details` truncates Output at 2500
+          # characters. The two markers this verification depends on are printed
+          # last, so a chatty `update_from_remote` would push them out of view
+          # and the run would report "printed no theme version" *after having
+          # deployed successfully*. get-command-invocation is the documented API
+          # for a single instance and returns up to 24000 characters.
+          INVOCATION=$(aws ssm get-command-invocation \
+            --region "${AWS_REGION}" \
+            --command-id "${CMD_ID}" \
+            --instance-id "${INSTANCE_ID}" \
+            --output json)
+
+          STATUS=$(echo "${INVOCATION}" | jq -r '.Status')
+          RESPONSE_CODE=$(echo "${INVOCATION}" | jq -r '.ResponseCode // "null"')
+          OUTPUT=$(echo "${INVOCATION}" | jq -r '.StandardOutputContent // ""')
+          ERROR_OUTPUT=$(echo "${INVOCATION}" | jq -r '.StandardErrorContent // ""')
+
+          echo "--- stdout from ${INSTANCE_ID} ---"
+          echo "${OUTPUT}"
+          # stderr matters as much as stdout here: the remote script reports
+          # every refusal through Ruby's `abort`, which writes there. Printing
+          # only stdout would hide the one line that says what went wrong.
+          echo "--- stderr from ${INSTANCE_ID} ---"
+          echo "${ERROR_OUTPUT}"
+          echo "----------------------------------"
+
+          if [ "${STATUS}" != "Success" ]; then
+            echo "::error::The SSM command finished with status ${STATUS} (remote exit code ${RESPONSE_CODE}). The theme was not updated."
+            exit 1
+          fi
+
+          # Belt and braces: SSM reports Success only when the exit code is 0,
+          # but reading the code directly means a future change to that
+          # behaviour cannot turn a failure green without anyone noticing.
+          if [ "${RESPONSE_CODE}" != "0" ]; then
+            echo "::error::The remote script exited ${RESPONSE_CODE} even though SSM reported ${STATUS}. Treating this as a failure."
+            exit 1
+          fi
+
+          LOCAL_VERSION=$(echo "${OUTPUT}" | sed -n 's/^THEME_LOCAL_VERSION=//p' | tail -1)
+          THEME_NAME=$(echo "${OUTPUT}" | sed -n 's/^THEME_NAME=//p' | tail -1)
+
+          if [ -z "${LOCAL_VERSION}" ]; then
+            echo "::error::The remote script succeeded but printed no theme version. Nothing here can confirm what the forum is serving."
+            exit 1
+          fi
+
+          echo "Theme ${THEME_ID} (\"${THEME_NAME}\") is now at ${LOCAL_VERSION}"
+
+          # A zero exit code is not proof of a deployment. Discourse reports
+          # success for a no-op, and for a pull that failed in a way it
+          # swallowed. The only honest evidence is the commit the theme now
+          # sits on.
+          #
+          # It need not be *this* run's commit. `update_from_remote` pulls the
+          # branch tip, and the tip can legitimately be ahead: a push made with
+          # another repository's GITHUB_TOKEN does not trigger workflows, so the
+          # cache-buster automation can land here without a run of its own and
+          # without the concurrency group ever seeing it. When that happens the
+          # forum is newer and correct, and failing would be a permanent red over
+          # a healthy deployment. So a descendant is accepted, an unrelated or
+          # older commit is not.
+          if [ "${LOCAL_VERSION}" != "${GITHUB_SHA}" ]; then
+            git fetch --quiet origin "${GITHUB_REF_NAME}" 2>/dev/null || true
+            if ! git cat-file -e "${LOCAL_VERSION}^{commit}" 2>/dev/null; then
+              echo "::error::Theme ${THEME_ID} is at ${LOCAL_VERSION}, which is not this run's ${GITHUB_SHA} and is not a commit in this repository. Nothing here can vouch for what the forum is serving."
+              exit 1
+            fi
+            if git merge-base --is-ancestor "${GITHUB_SHA}" "${LOCAL_VERSION}"; then
+              echo "::notice::Theme ${THEME_ID} is at ${LOCAL_VERSION}, a descendant of this run's ${GITHUB_SHA} — a newer commit reached ${GITHUB_REF_NAME} while this run was in flight. This commit is deployed; the newer one is what the forum now serves."
+            else
+              echo "::error::The update reported success but theme ${THEME_ID} is at ${LOCAL_VERSION}, which is neither ${GITHUB_SHA} nor a descendant of it. The forum did not pull this commit."
+              exit 1
+            fi
+          fi
+
+          {
+            echo "Updated theme **${THEME_ID}** (\"${THEME_NAME}\") on the **${ENV_NAME}** forum."
+            echo ""
+            echo "| | |"
+            echo "| -- | -- |"
+            echo "| Instances tagged | \`Role=${INSTANCE_TAG}\` |"
+            echo "| Branch | \`${GITHUB_REF_NAME}\` |"
+            echo "| Commit now live on the theme | \`${LOCAL_VERSION}\` |"
+          } >> "${GITHUB_STEP_SUMMARY}"
