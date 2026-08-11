@@ -59,6 +59,23 @@ jobs:
   deploy:
     name: Update the forum theme
     runs-on: ubuntu-latest
+    # The production gate (COMM-40, option B). A job-level environment is
+    # evaluated BEFORE the first step runs, so on `master` this run sits in
+    # "Waiting" until a required reviewer approves it — no AWS credentials are
+    # configured, no SSM command is sent, nothing touches the production forum.
+    # On `staging` it resolves to an environment with no protection rules and
+    # the run proceeds unchanged.
+    #
+    # This is the project's delivery rule applied to the theme: everything
+    # reaches staging on its own, nothing reaches production without a human.
+    # Before it, a push to `master` here deployed the production forum with
+    # nobody looking — and because the SSM script is built from repository
+    # content, whoever could push could run it as root on that box.
+    #
+    # Naming the environments also gives option A its seam: once a second IAM
+    # user exists, its keys go in the `production` environment's secrets and
+    # the `staging` ones stay in `staging`, with no `if` anywhere in this file.
+    environment: ${{ github.ref_name == 'master' && 'production' || 'staging' }}
     steps:
       - name: Resolve the target forum
         id: target
