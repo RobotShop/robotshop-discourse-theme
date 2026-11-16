@@ -164,6 +164,17 @@ img[src*="http://www.robotshop.com/community/forum/uploads/"]{
 max-height: unset !important;
 }
 
+// ZEN-1151949 / IT-3265: keep the reply composer inside the window.
+// Discourse places the docked composer with a left margin (the sidebar, or the
+// centring of the content column) and caps its width with a max-width. The
+// Community stylesheet (forum.css) lifts that cap with max-width: 100% !important,
+// so the composer kept the full window width AND the left margin, and ran
+// ~400-500px past the right edge, hiding the Reply button on Discourse 2026.10.
+// width: auto makes it fill from its left edge to the right edge of the window.
+#reply-control:not(.fullscreen).hide-preview {
+  width: auto !important;
+}
+
 
 #user-card
 {
